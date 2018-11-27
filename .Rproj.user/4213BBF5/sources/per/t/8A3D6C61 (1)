@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1543180000577.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2183153752",
+    "id" : "8A3D6C61",
+    "lastKnownWriteTime" : 1543271836,
+    "last_content_update" : 1543271836,
+    "path" : "~/Google Drive/Meetings/2018/geosciences-colloquia/index.Rmd",
+    "project_path" : "index.Rmd",
+    "properties" : {
+        "cursorPosition" : "166,26",
+        "docOutlineVisible" : "0",
+        "scrollLine" : "163"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

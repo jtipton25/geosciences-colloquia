@@ -1,0 +1,490 @@
+---
+title: "Modeling Sediment Mixing using Mixtures of Dirichlet Processes"
+author: |
+  | John Tipton
+  | University of Arkansas
+  |
+date: |
+  | Joint Statistical Meetings
+  | July 29, 2018
+header-includes:
+- \newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
+- \newcommand{\eqn}[1]{\begin{align}#1\end{align}}
+- \newcommand{\eq}[1]{\begin{align*}#1\end{align*}}
+- \newcommand{\ve}{\varepsilon}
+- \newcommand{\sve}{\sigma^2_{\varepsilon}}
+- \newcommand{\se}{\sigma^2_{\eta}}
+- \newcommand{\bs}[1]{\boldsymbol#1}
+- \newcommand{\bm}[1]{\mathbf#1}
+- \newcommand{\sbs}{\sigma^2_{\beta}}
+- \newcommand{\oN}[1]{\operatorname{#1}}
+- \usepackage{float}
+- \usepackage{subcaption}
+- \usepackage{setspace}
+- \usepackage{lineno}
+- \usepackage{gensymb}
+- \usepackage{animate}
+output:
+  beamer_presentation:
+    theme: metropolis
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+## Sediment Mixing
+
+\centering\includegraphics[width=0.95\linewidth]{../intro-math-seminar/sediment-mixing.png}
+
+Sharman and Johnstone (2017). Sediment unmixing using detrital geochronology. Earth and Palenetary Science Letters.
+
+
+## Goals
+
+1) Estimate proportion of each *parent* in a *daughter*.
+
+
+\vspace{12mm}
+
+
+2) Reconstruct unobserved *parent* distributions given *daughters*. 
+
+
+
+
+## Data
+
+\centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/parents-data-subset-jsm-skinny.png}
+
+\centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/daughters-data-subset-jsm-skinny.png}
+
+
+## Mixing Model
+
+Estimate proportion of each *parent* in a *daughter*.
+
+
+## Data Model
+
+- Dating uncertainty.
+
+\vspace{5mm}
+
+- $y_{ib}$: age measurement on mineral $i=1, \ldots, N_b$ for parent $b = 1, \ldots, B$.
+
+\vspace{5mm}
+
+- $z_i$: age measurement for mineral $i=1, \ldots, N$ of daughter.
+
+\vspace{5mm}
+
+- Measurement error reported as standard deviation $\sigma_{ib}$ ($\sigma_i$).
+
+\vspace{-5mm}
+
+\begin{align*}
+y_{ib} & \sim \operatorname{N}(\widetilde{y}_{ib}, \sigma^2_{ib}).  \\
+z_i & \sim \operatorname{N}(\widetilde{z}_i, \sigma^2_i).
+\end{align*}
+
+
+## Process Model
+
+\vspace{6mm}
+**Assumptions:**
+
+\vspace{4mm}
+
+- An unknown number of mineral creation events that are relatively discrete in geologic time.
+
+\vspace{4mm}
+
+- Each parent is an mixture of minerals from creation events.
+
+\vspace{4mm}
+
+- Each daughter is a mixture of parents.
+
+
+## Process Model
+
+- For each parent $b$, the proportion of creation events is $\mathbf{p}_b$ where $p_{bk} > 0$ and $\sum_{k=1}^\infty p_{bk} = 1$. 
+
+\vspace{4mm}
+
+- Most of the $p_{bk}$s are 0 (reasonable in real world).
+
+\vspace{4mm}
+
+- Unkown number of mineral creation events.
+
+## Process Model: Parent Distribution
+
+\begin{align*}
+\widetilde{y}_{ib} \sim \sum_{k=1}^\infty p_{bk} \operatorname{N}(\mu_k, \sigma^2_k).
+\end{align*}
+
+\begin{figure}
+\begin{subfigure}[t]{0.32\textwidth}
+\centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/age-mixing-model.png}
+\end{subfigure} \hfill
+\begin{subfigure}[t]{0.32\textwidth}
+\centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/weighted-age-mixing-model.png}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.32\textwidth}
+\centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/weighted-age-mixing-model-filled.png}
+\end{subfigure}
+\end{figure}
+
+## Dirichlet Process
+
+- Assigns observations to clusters.
+
+\vspace{4mm}
+
+- Model for $\mathbf{p}_b$.
+
+\vspace{4mm}
+
+- Number of clusters increases with number of observations.
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE}
+library(gganimate)
+library(ggplot2)
+set.seed(501)
+theme_set(theme_bw())
+K <- 20
+iter <- 100
+cluster <- rep(0, iter)
+
+for (i in 1:iter) {
+  b <- rbeta(K, 1, 5)
+  p <- numeric(K)
+  p[1] <- b[1]
+  p[2:K] <- sapply(2:K, function(i) b[i] * prod(1 - b[1:(i-1)]))
+  cluster[i] <- sample(1:K, 1, prob=p)
+}
+cluster <- factor(cluster, levels=1:K)
+dat <- data.frame(
+  count = c(unlist(sapply(1:iter, function(i) tabulate(cluster[1:i], nbins=K)))),
+  cluster=rep(1:K, times=iter*K),
+  
+  iter=rep(factor(1:iter), each=K))
+p1 <- ggplot(dat, aes(x=cluster, y=count, frame=iter)) + geom_point() + 
+  ggtitle("Prior with many clusters, sediment grain = ") + 
+  xlab("Number Rock Creation Events") + 
+  ylab("Number sediment grains")
+gganimate(p1, "~/Google Drive/Meetings/2018/intro-math-seminar/dp1.gif", interval=0.01)
+
+for (i in 1:iter) {
+  b <- rbeta(K, 1, 1/5)
+  p <- numeric(K)
+  p[1] <- b[1]
+  p[2:K] <- sapply(2:K, function(i) b[i] * prod(1 - b[1:(i-1)]))
+  cluster[i] <- sample(1:K, 1, prob=p)
+}
+cluster <- factor(cluster, levels=1:K)
+dat <- data.frame(
+  count = c(unlist(sapply(1:iter, function(i) tabulate(cluster[1:i], nbins=K)))),
+  cluster=rep(1:K, times=iter*K),
+  
+  iter=rep(factor(1:iter), each=K))
+p2 <- ggplot(dat, aes(x=cluster, y=count, frame=iter)) + geom_point() + 
+  ggtitle("Prior with few clusters, sediment grain = ") + 
+  xlab("Number Rock Creation Events") + 
+  ylab("Number sediment grains")
+gganimate(p2, "~/Google Drive/Meetings/2018/intro-math-seminar/dp2.gif", interval=0.01)
+gganimate(p2, "~/Google Drive/Meetings/2018/intro-math-seminar/dp2.mp4", interval=0.01)
+```
+
+
+
+```{r, results="hide", cache=TRUE}
+library(animation)
+library(knitr)
+
+library(gganimate)
+library(ggplot2)
+source("./functions/multiplot.R")
+set.seed(501)
+theme_set(theme_bw())
+K <- 20
+iter <- 100
+cluster <- rep(0, iter)
+
+for (i in 1:iter) {
+  b <- rbeta(K, 1, 5)
+  p <- numeric(K)
+  p[1] <- b[1]
+  p[2:K] <- sapply(2:K, function(i) b[i] * prod(1 - b[1:(i-1)]))
+  cluster[i] <- sample(1:K, 1, prob=p)
+}
+cluster <- factor(cluster, levels=1:K)
+dat <- data.frame(
+  count = c(unlist(sapply(1:iter, function(i) tabulate(cluster[1:i], nbins=K)))),
+  cluster=rep(1:K, times=iter*K),
+  iter=rep(factor(1:iter), each=K))
+
+for (i in 1:iter) {
+  b <- rbeta(K, 1, 1)
+  p <- numeric(K)
+  p[1] <- b[1]
+  p[2:K] <- sapply(2:K, function(i) b[i] * prod(1 - b[1:(i-1)]))
+  cluster[i] <- sample(1:K, 1, prob=p)
+}
+cluster <- factor(cluster, levels=1:K)
+dat2 <- data.frame(
+  count = c(unlist(sapply(1:iter, function(i) tabulate(cluster[1:i], nbins=K)))),
+  cluster=rep(1:K, times=iter*K),
+  
+  iter=rep(factor(1:iter), each=K))
+
+lims <- c(0, max(max(dat$count), dat2$count))
+for (i in 1:100) {
+  p1 <- ggplot(subset(dat, iter == i), aes(x=cluster, y=count)) + geom_point() + 
+    ggtitle(paste("Prior with many clusters\n Sediment grain =", i)) + 
+    xlab("Number Rock Creation Events") + 
+    ylab("Number sediment grains") + 
+    ylim(lims) + 
+    theme(plot.title = element_text(size=22, face="bold"), 
+          axis.text=element_text(size=14),
+          axis.title=element_text(size=18, face="bold"))
+
+  
+  p2 <- ggplot(subset(dat2, iter == i), aes(x=cluster, y=count)) + geom_point() + 
+    ggtitle(paste("Prior with few clusters\n Sediment grain =", i)) + 
+    xlab("Number Rock Creation Events") + 
+    ylab("Number sediment grains") + 
+    ylim(lims) + 
+    theme(plot.title = element_text(size=22, face="bold"), 
+          axis.text=element_text(size=14),
+          axis.title=element_text(size=18, face="bold"))
+  
+  png(file=here::here("animations", paste0("clusters", i, ".png")),     
+      width=16, height=9, units="in", res=200)
+  multiplot(p1, p2, cols=2)
+  dev.off()
+}
+
+# saveLatex(make_plot(), latex.filename = "", documentclass = NULL, 
+#           # ani.opts = list(interval=0.1, imgdir="animations", ani.width=480, ani.height=270),
+#           img.name = "clusters")
+```
+
+
+## Dirichlet Process 
+
+<!-- Add this in later -->
+
+\begin{center}
+\animategraphics[controls, width=0.95\textwidth]{10.0}{animations/clusters}{1}{100}
+\end{center}
+
+
+## Dirichlet Process 
+
+\begin{center} Many Creation Events \end{center}
+
+\begin{figure}
+\begin{subfigure}[t]{0.32\textwidth}
+\centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/age-mixing-model.png}
+\end{subfigure} \hfill
+\begin{subfigure}[t]{0.32\textwidth}
+\centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/weighted-age-mixing-model.png}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.32\textwidth}
+\centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/weighted-age-mixing-model-filled.png}
+\end{subfigure}
+\end{figure}
+
+## Dirichlet Process 
+
+\begin{center} Few Creation Events \end{center}
+
+\begin{figure}
+\begin{subfigure}[t]{0.32\textwidth}
+\centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/age-mixing-model-few.png}
+\end{subfigure} \hfill
+\begin{subfigure}[t]{0.32\textwidth}
+\centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/weighted-age-mixing-model-few.png}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.32\textwidth}
+\centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/weighted-age-mixing-model-filled-few.png}
+\end{subfigure}
+\end{figure}
+
+
+## Process Model - Mixing Model
+
+- Daughter is a mixture of parents.
+
+\begin{align*}
+\widetilde{z}_j & \sim \sum_{b=1}^B \phi_b \sum_{k=1}^K p_{bk} \operatorname{N}(\mu_k, \sigma^2_k).
+\end{align*}
+
+- $\phi_b$ is the proportion of daughter sediments from parent $b$.
+
+
+## Process Model - Mixing Model
+\begin{align*}
+\phi_1 = 0.200 \quad\quad\,\, \phi_2 = 0.532 \quad\quad\,\, \phi_3 = 0.268 \quad\quad\quad \mbox{Daughter}
+\end{align*} 
+\begin{figure}
+\begin{subfigure}[t]{0.24\textwidth}
+\centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/weighted-age-mixing-model-filled-parent1.png}
+\end{subfigure} \hfill
+\begin{subfigure}[t]{0.24\textwidth}
+\centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/weighted-age-mixing-model-filled-parent2.png}
+\end{subfigure} \hfill
+\begin{subfigure}[t]{0.24\textwidth}
+\centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/weighted-age-mixing-model-filled-parent3.png}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.24\textwidth}
+\centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/weighted-age-mixing-model-filled-daughter.png}
+\end{subfigure}
+\end{figure}
+
+## Simulation Study: Mixing
+
+\centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/sim-fit-joint-hand-shared-age-jsm.png}
+
+## Simulation Study: Mixing
+
+\centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/sim-joint-hand-shared-age-jsm.png}
+
+
+## Mixing Estimates
+<!-- Check These figures - they don't agree -->
+\begin{figure}
+\begin{subfigure}[t]{0.48\textwidth}
+\centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/fit-joint-hand-shared-subset-jsm.png}
+\end{subfigure} \hfill
+\begin{subfigure}[t]{0.48\textwidth}
+\centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/fit-mix-daughters-data.png}
+%\centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/fit-joint-hand-shared-subset.png}
+\end{subfigure}
+\end{figure}
+
+
+
+# Unmixing Model
+
+## Unmixing Model
+
+\vspace{4mm}
+
+**Goal:** Estimate unobserved parent distributions.
+
+## Unmixing
+
+\centering\includegraphics[width=0.90\linewidth]{../../../mixing/figures/daughters-data-subset-jsm.png}
+
+
+```{r, fig.align="center", fig.height=3, fig.width=8, message=FALSE, include=FALSE}
+library(readxl)
+library(ggplot2)
+# excel_sheets("~/SirMixALot/TestData/Sickmann_etal_2016_Data.xlsx")
+dat <- read_excel("~/SirMixALot/TestData/Sickmann_etal_2016_Data.xlsx", 
+                  sheet="AgesErrors", skip=1)
+y <- dat[, (1:12)*2-1]
+sd <- dat[, (1:12)*2]
+colnames(y) <- c("MAN", "MLB", "DR585", "DR591", "DR584", "T755", "MDP",
+                 "T1135", "GSB", "T693", "T978", "T958")
+colnames(sd) <- c("MAN", "MLB", "DR585", "DR591", "DR584", "T755", "MDP",
+                  "T1135", "GSB", "T693", "T978", "T958")
+
+set.seed(101)
+## Define the samples sizes
+n <- rep(0, 12)
+for (i in 1:12) {
+  n[i] <- length(na.omit(y[[i]]))
+}
+
+## Define the number of mixture components for the partents
+
+daughters <- data.frame(
+  daughter = rep(colnames(y), n),
+  age = na.omit(unlist(y)))
+
+png(file="~/Google Drive/Meetings/2018/intro-math-seminar/daughters-data.png",
+    width=16, height=9, units="in", res=200)
+print(ggplot(subset(daughters, age < 350), aes(x=age, group=daughter)) + 
+        geom_histogram(aes(y=..density..), bins=200) +
+        facet_wrap( ~ daughter, ncol=6) + 
+        theme(legend.position="none"))
+dev.off()
+```
+
+
+## Unmixing Model
+
+\begin{align*}
+z_{dj} & \sim \operatorname{N}(\widetilde{z}_{dj}, \sigma^2_{dj}).
+\end{align*}
+
+
+\begin{align*}
+\widetilde{z}_{dj} & \sim \sum_{b=1}^B \phi_{db} \sum_{k=1}^K p_{bk} \operatorname{N}(\mu_k, \sigma^2_k).
+\end{align*}
+
+
+## Simulation Study: Unmixing
+
+\centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/sim-unmixing-jsm.png}
+
+## Simulation Study: Unmixing
+
+\centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/fit-unmix-sim-jsm.png}
+
+## Unmixing Reconstructions
+
+\begin{figure}
+\begin{subfigure}[t]{0.48\textwidth}
+\centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/fit-unmix-data-jsm.png}
+\end{subfigure} \hfill
+\begin{subfigure}[t]{0.48\textwidth}
+\centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/fit-unmix-daughters-data-jsm.png}
+\end{subfigure}
+\end{figure}
+
+
+## Conclusions
+
+\vspace{4mm}
+
+- Dirichlet process model can be used to describe sediment mixing processes.
+
+\vspace{4mm}
+
+- Estimation of mixing and reconstruction with uncertainty.
+
+\vspace{4mm}
+
+- Can ask questions like: what is probability at least 50\% of sediment is from parent $b$:
+
+\begin{align*}
+\sum_{k=1}^K I\{ \phi_b^{(k)} > 0.5 \}.
+\end{align*}
+
+## Conclusions 
+
+- Future extensions:
+
+    - Account for spatial correlation among daughters.
+    
+    - Account for temporal correlation within a sediment core.
+
+
+\vspace{6mm}
+
+- John Tipton
+
+\vspace{4mm}
+
+- jrtipton@uark.edu
+
+
+

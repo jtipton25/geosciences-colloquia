@@ -1,0 +1,4 @@
+Title: Don't let your statistics ruin the science that you love
+
+Abstract:
+Statistics is often taught as a recipe - if your data are X then do Y. Too often, the statistical methods being applied are devoid of any mechanistic understanding. In contrast, science is performed by generating and refining mechanistic hypotheses. Often, much is known about the underlying mechanistic process that generates the data even when the exact form of the mechanism is unknown. In this talk, I present a Bayesian hierarchical modeling paradigm that integrates statistical methods with scientific mechanism, allowing for expression of more complex scientific theories in the statistics. To demonstrate the power of these methods, I present examples from dendrochronology, paleoclimatology, and sediment geology. 
