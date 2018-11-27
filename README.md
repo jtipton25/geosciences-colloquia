@@ -1,3 +1,3 @@
-# KSU-9-27-2018
+# University of Arkansas Geosciences Colloquim Talk
 
-The slides for my presentation at Kansas State University
+The slides for my presentation at the University of Arkansas Geosciences Department
