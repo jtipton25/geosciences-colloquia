@@ -33,6 +33,7 @@ library(knitr)
 library(fields)
 library(animation)
 library(gganimate)
+library(gplots)
 source(here("functions", "multiplot.R"))
 knitr::opts_chunk$set(echo = FALSE, 
                       fig.align="center",
@@ -481,10 +482,12 @@ $$
 
 ## Local Prediction
 
-```{r, out.width='75%'}
+```{r, out.width='60%'}
 # knitr::include_graphics(here("images", "Science.png"))
-knitr::include_graphics("./images/Konza1.jpg")
+knitr::include_graphics("./images/Morning_on_the_Buffalo_River.jpg")
 ```
+
+<font size="+1">By OakleyOriginals - <a rel="nofollow" class="external free" href="https://www.flickr.com/photos/oakleyoriginals/2954878643/">https://www.flickr.com/photos/oakleyoriginals/2954878643/</a>, <a href="https://creativecommons.org/licenses/by/2.0" title="Creative Commons Attribution 2.0">CC BY 2.0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=26975858">Link</a></font>
 
 
 ## Introduction | Predicting the future by learning from the past
@@ -553,14 +556,6 @@ knitr::include_graphics(here("images", "future.png"))
 
 
 
-
-
-
-
-
-
-
-
 ## Sediment Mixing
 
 ```{r, out.width = "70%"}
@@ -575,12 +570,14 @@ Sharman and Johnstone (2017). Sediment unmixing using detrital geochronology. Ea
 ## Goals
 
 * Estimate proportion of each *parent* in a *daughter*.
+    * Mixing model,
 
 
 <hr style="height:16px; visibility:hidden;" />
 
 
 * Reconstruct unobserved *parent* distributions given *daughters*. 
+    * Unmixing model.
 
 
 
@@ -603,6 +600,17 @@ include_graphics(here("..", "..", "..", "mixing", "figures",
 
 # Mixing Model: Estimate proportion of each *parent* in a *daughter*.
 
+# Data Model
+
+
+$$
+{\huge
+\begin{align*}
+[\mathbf{z}, \boldsymbol{\theta}_D, \boldsymbol{\theta}_P | \mathbf{y}] & \propto
+\color{red}{[\mathbf{y} | \boldsymbol{\theta}_D, \mathbf{z}]}  [\mathbf{z} | \boldsymbol{\theta}_P] [\boldsymbol{\theta}_D] [\boldsymbol{\theta}_P]
+\end{align*}
+}%
+$$
 
 ## Data Model
 
@@ -622,10 +630,22 @@ include_graphics(here("..", "..", "..", "mixing", "figures",
 
 $$
 \begin{align*}
-y_{ib} & \sim \operatorname{N}(z_{ib}, \sigma^2_{ib}).  \\
-y_{id} & \sim \operatorname{N}(z_{id}, \sigma^2_{id}).
+y_{ib} & \sim \color{red}{\operatorname{N}(z_{ib}, \sigma^2_{ib}).}  \\
+y_{id} & \sim \color{red}{\operatorname{N}(z_{id}, \sigma^2_{id}).}
 \end{align*}
 $$
+
+# Process Model
+
+$$
+{\huge
+\begin{align*}
+[\mathbf{z}, \boldsymbol{\theta}_D, \boldsymbol{\theta}_P | \mathbf{y}] & \propto
+[\mathbf{y} | \boldsymbol{\theta}_D, \mathbf{z}]  \color{blue}{[\mathbf{z} | \boldsymbol{\theta}_P]}[\boldsymbol{\theta}_D] [\boldsymbol{\theta}_P]
+\end{align*}
+}
+$$
+
 
 ## Process Model
 
@@ -645,23 +665,12 @@ $$
 - Each daughter is a mixture of parents.
 
 
-## Process Model
-
-- For each parent $b$, the proportion of creation events is $\mathbf{p}_b$ where $p_{bk} > 0$ and $\sum_{k=1}^\infty p_{bk} = 1$. 
-
-<hr style="height:16px; visibility:hidden;" />
-
-- Most of the $p_{bk}$s are 0 (reasonable in real world).
-
-<hr style="height:16px; visibility:hidden;" />
-
-- Unkown number of mineral creation events.
 
 <!-- ## Process Model: Parent Distribution -->
 
 <!-- $$ -->
 <!-- \begin{align*} -->
-<!-- z_{ib} \sim \sum_{k=1}^\infty p_{bk} \operatorname{N}(\mu_k, \sigma^2_k). -->
+<!-- z_{ib} \sim \sum_{k=1}^K p_{bk} \operatorname{N}(\mu_k, \sigma^2_k). -->
 <!-- \end{align*} -->
 <!-- $$ -->
 
@@ -679,7 +688,7 @@ $$
 
 $$
 \begin{align*}
-{z}_{ib} \sim \sum_{k=1}^\infty p_{bk} \operatorname{N}(\mu_k, \sigma^2_k).
+{z}_{ib} \sim \color{blue}{\sum_{k=1}^K p_{bk} \operatorname{N}(\mu_k, \sigma^2_k).}
 \end{align*}
 $$
 
@@ -703,6 +712,72 @@ $$
 <!-- \centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/weighted-age-mixing-model-filled.png} -->
 <!-- \end{subfigure} -->
 <!-- \end{figure} -->
+
+## Process Model - Mixing Model for daughter
+
+- Daughter is a mixture of parents.
+
+$$
+\begin{align*}
+z_{id} & \sim \color{blue}{\sum_{b=1}^B \phi_b \sum_{k=1}^K p_{bk} \operatorname{N}(\mu_k, \sigma^2_k).}
+\end{align*}
+$$
+
+- $\phi_b$ is the proportion of daughter sediments from parent $b$.
+
+
+## Process Model - Mixing Model
+$$
+\begin{align*}
+\phi_1 = 0.200 \quad\quad\,\,\, \phi_2 = 0.532 \quad\quad\,\,\,\,\, \phi_3 = 0.268 \,\,\quad\quad\quad \mbox{Daughter}
+\end{align*} 
+$$
+
+<center>
+<img src="../../../mixing/figures/weighted-age-mixing-model-filled-parent1.png" alt="drawing" width="220"/> 
+<img src="../../../mixing/figures/weighted-age-mixing-model-filled-parent2.png" alt="drawing" width="220"/> 
+<img src="../../../mixing/figures/weighted-age-mixing-model-filled-parent3.png" alt="drawing" width="220"/> 
+<img src="../../../mixing/figures/weighted-age-mixing-model-filled-daughter.png" alt="drawing" width="220"/> 
+</center>
+
+<!-- \begin{figure} -->
+<!-- \begin{subfigure}[t]{0.24\textwidth} -->
+<!-- \centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/weighted-age-mixing-model-filled-parent1.png} -->
+<!-- \end{subfigure} \hfill -->
+<!-- \begin{subfigure}[t]{0.24\textwidth} -->
+<!-- \centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/weighted-age-mixing-model-filled-parent2.png} -->
+<!-- \end{subfigure} \hfill -->
+<!-- \begin{subfigure}[t]{0.24\textwidth} -->
+<!-- \centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/weighted-age-mixing-model-filled-parent3.png} -->
+<!-- \end{subfigure}\hfill -->
+<!-- \begin{subfigure}[t]{0.24\textwidth} -->
+<!-- \centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/weighted-age-mixing-model-filled-daughter.png} -->
+<!-- \end{subfigure} -->
+<!-- \end{figure} -->
+
+# Prior Model
+
+$$
+{\huge
+\begin{align*}
+[\mathbf{z}, \boldsymbol{\theta}_D, \boldsymbol{\theta}_P | \mathbf{y}] & \propto
+[\mathbf{y} | \boldsymbol{\theta}_D, \mathbf{z}]  [\mathbf{z} | \boldsymbol{\theta}_P]\color{orange}{[\boldsymbol{\theta}_D] [\boldsymbol{\theta}_P]}
+\end{align*}
+}
+$$
+
+
+## Prior Model for the number of creation events
+
+- For each parent $b$, the proportion of creation events is $\mathbf{p}_b$ where $p_{bk} > 0$ and $\sum_{k=1}^K p_{bk} = 1$. 
+
+<hr style="height:16px; visibility:hidden;" />
+
+- Most of the $p_{bk}$s are 0 (reasonable in real world).
+
+<hr style="height:16px; visibility:hidden;" />
+
+- Unkown number of mineral creation events.
 
 ## Dirichlet Process
 
@@ -869,7 +944,7 @@ dat <- data.frame(
   iter=rep(factor(1:iter), each=K))
 p1 <- ggplot(dat, aes(x=cluster, y=count, frame=iter)) + geom_point() + 
   ggtitle("Prior with many clusters, sediment grain = ") + 
-  xlab("Number Rock Creation Events") + 
+  xlab("Mineral Creation Events") + 
   ylab("Number sediment grains")
 gganimate(p1, "~/Google Drive/Meetings/2018/intro-math-seminar/dp1.gif", interval=0.01)
 
@@ -888,7 +963,7 @@ dat <- data.frame(
   iter=rep(factor(1:iter), each=K))
 p2 <- ggplot(dat, aes(x=cluster, y=count, frame=iter)) + geom_point() + 
   ggtitle("Prior with few clusters, sediment grain = ") + 
-  xlab("Number Rock Creation Events") + 
+  xlab("Mineral Creation Events") + 
   ylab("Number sediment grains")
 gganimate(p2, "~/Google Drive/Meetings/2018/intro-math-seminar/dp2.gif", interval=0.01)
 gganimate(p2, "~/Google Drive/Meetings/2018/intro-math-seminar/dp2.mp4", interval=0.01)
@@ -934,7 +1009,7 @@ lims <- c(0, max(max(dat$count), dat2$count))
 for (i in 1:100) {
   p1 <- ggplot(subset(dat, iter == i), aes(x=cluster, y=count)) + geom_point() + 
     ggtitle(paste("Prior with many clusters\n Sediment grain =", i)) + 
-    xlab("Number Rock Creation Events") + 
+    xlab("Mineral Creation Events") + 
     ylab("Number sediment grains") + 
     ylim(lims) + 
     theme(plot.title = element_text(size=22, face="bold"), 
@@ -944,17 +1019,14 @@ for (i in 1:100) {
   
   p2 <- ggplot(subset(dat2, iter == i), aes(x=cluster, y=count)) + geom_point() + 
     ggtitle(paste("Prior with few clusters\n Sediment grain =", i)) + 
-    xlab("Number Rock Creation Events") + 
+    xlab("Mineral Creation Events") + 
     ylab("Number sediment grains") + 
     ylim(lims) + 
     theme(plot.title = element_text(size=22, face="bold"), 
           axis.text=element_text(size=14),
           axis.title=element_text(size=18, face="bold"))
   
-  # png(file=here::here("animations", paste0("clusters", i, ".png")),     
-  #     width=16, height=9, units="in", res=200)
   multiplot(p1, p2, cols=2)
-  # dev.off()
 }
 
 # saveLatex(make_plot(), latex.filename = "", documentclass = NULL, 
@@ -1012,47 +1084,7 @@ for (i in 1:100) {
 <!-- \end{figure} -->
 
 
-## Process Model - Mixing Model
-
-- Daughter is a mixture of parents.
-
-$$
-\begin{align*}
-z_{id} & \sim \sum_{b=1}^B \phi_b \sum_{k=1}^K p_{bk} \operatorname{N}(\mu_k, \sigma^2_k).
-\end{align*}
-$$
-
-- $\phi_b$ is the proportion of daughter sediments from parent $b$.
-
-
-## Process Model - Mixing Model
-$$
-\begin{align*}
-\phi_1 = 0.200 \quad\quad\,\,\, \phi_2 = 0.532 \quad\quad\,\,\,\,\, \phi_3 = 0.268 \,\,\quad\quad\quad \mbox{Daughter}
-\end{align*} 
-$$
-
-<center>
-<img src="../../../mixing/figures/weighted-age-mixing-model-filled-parent1.png" alt="drawing" width="220"/> 
-<img src="../../../mixing/figures/weighted-age-mixing-model-filled-parent2.png" alt="drawing" width="220"/> 
-<img src="../../../mixing/figures/weighted-age-mixing-model-filled-parent3.png" alt="drawing" width="220"/> 
-<img src="../../../mixing/figures/weighted-age-mixing-model-filled-daughter.png" alt="drawing" width="220"/> 
-</center>
-
-<!-- \begin{figure} -->
-<!-- \begin{subfigure}[t]{0.24\textwidth} -->
-<!-- \centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/weighted-age-mixing-model-filled-parent1.png} -->
-<!-- \end{subfigure} \hfill -->
-<!-- \begin{subfigure}[t]{0.24\textwidth} -->
-<!-- \centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/weighted-age-mixing-model-filled-parent2.png} -->
-<!-- \end{subfigure} \hfill -->
-<!-- \begin{subfigure}[t]{0.24\textwidth} -->
-<!-- \centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/weighted-age-mixing-model-filled-parent3.png} -->
-<!-- \end{subfigure}\hfill -->
-<!-- \begin{subfigure}[t]{0.24\textwidth} -->
-<!-- \centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/weighted-age-mixing-model-filled-daughter.png} -->
-<!-- \end{subfigure} -->
-<!-- \end{figure} -->
+# Simulation Study: Mixing model
 
 ## Simulation Study: Mixing
 
@@ -1129,20 +1161,31 @@ dev.off()
 
 <hr style="height:24px; visibility:hidden;" />
 
-$$
-\begin{align*}
-y_{id} & \sim \operatorname{N}(z_{id}, \sigma^2_{id}).
-\end{align*}
-$$
+* $\color{red}{\mbox{Data model:}}$
 
-<hr style="height:8px; visibility:hidden;" />
+
 
 $$
 \begin{align*}
-z_{id} & \sim \sum_{b=1}^B \phi_{db} \sum_{k=1}^K p_{bk} \operatorname{N}(\mu_k, \sigma^2_k).
+y_{id} & \sim \color{red}{\operatorname{N}(z_{id}, \sigma^2_{id}).}
 \end{align*}
 $$
 
+<hr style="height:24px; visibility:hidden;" />
+
+* $\color{blue}{\mbox{Process model:}}$
+
+$$
+\begin{align*}
+z_{id} & \sim \color{blue}{\sum_{b=1}^B \phi_{db} \sum_{k=1}^K p_{bk} \operatorname{N}(\mu_k, \sigma^2_k).}
+\end{align*}
+$$
+
+<hr style="height:24px; visibility:hidden;" />
+
+* $\color{orange}{\mbox{Prior model:}}$
+
+    * Same Dirichlet Process clustering model as mixing model.
 
 ## Simulation Study: Unmixing
 
@@ -1158,6 +1201,8 @@ $$
 <img src="../../../mixing/figures/fit-unmix-sim-jsm.png" alt="drawing" width="850"/> 
 </center>
 <!-- \centering\includegraphics[width=0.95\linewidth]{../../../mixing/figures/fit-unmix-sim-jsm.png} -->
+
+# Unmixing the data
 
 ## Unmixing Reconstructions
 
@@ -1216,153 +1261,615 @@ $$
     * Noisy and messy.
     * Respond to a wide variety of non-climatic signals.
 
-# Pollen Data 
-
-<!-- ## Pollen Data -->
-
-<!-- ```{r, out.width='95%', echo=FALSE} -->
-<!-- knitr::include_graphics(here("images", "pollen.png")) -->
-<!-- ``` -->
-
-<!-- ## Pollen Data  -->
-
-<!-- ```{r, out.width='95%', echo=FALSE} -->
-<!-- knitr::include_graphics(here("images", "pollen-locations.png")) -->
-<!-- ``` -->
-
-<!-- ## Fossil Pollen Data  -->
-
-<!-- ```{r, out.width='95%', echo=FALSE} -->
-<!-- knitr::include_graphics(here("images", "fossil-pollen-locations.png")) -->
-<!-- ``` -->
-
-
-<!-- ## Model Framework -->
-
-<!-- * <p> -->
-<!--   <span> Bayesian hierarchical model. </span> -->
-<!-- </p> -->
-
-<!-- $\begin{align*} -->
-<!-- [\mathbf{z}, \boldsymbol{\theta}_D, \boldsymbol{\theta}_P | \mathbf{y}] & \propto  -->
-<!-- [\mathbf{y} | \boldsymbol{\theta}_D, \mathbf{z}]  [\mathbf{z} | \boldsymbol{\theta}_P] [\boldsymbol{\theta}_D] [\boldsymbol{\theta}_P] -->
-<!-- \end{align*}$ -->
-
-<!-- <p> -->
-<!--   <span>  </span> -->
-<!-- </p> -->
-
-<!-- ## Model Framework -->
-
-<!-- * <p> -->
-<!--   <span> Bayesian hierarchical model. </span> -->
-<!-- </p> -->
-
-<!-- $\begin{align*} -->
-<!-- \color{cyan}{[\mathbf{z}, \boldsymbol{\theta}_D, \boldsymbol{\theta}_P | \mathbf{y}]} & \propto  -->
-<!-- [\mathbf{y} | \boldsymbol{\theta}_D, \mathbf{z}]  [\mathbf{z} | \boldsymbol{\theta}_P] [\boldsymbol{\theta}_D] [\boldsymbol{\theta}_P] -->
-<!-- \end{align*}$ -->
-
-<!-- * <p> -->
-<!--   <span style="color: #00ffff"> Posterior. </span> -->
-<!-- </p> -->
-
-
-<!-- ## Model Framework -->
-
-<!-- * <p> -->
-<!--   <span> Bayesian hierarchical model. </span> -->
-<!-- </p> -->
-
-<!-- $\begin{align*} -->
-<!-- \color{cyan}{[\mathbf{z}, \boldsymbol{\theta}_D, \boldsymbol{\theta}_P | \mathbf{y}]} & \propto  -->
-<!-- \color{red}{[\mathbf{y} | \boldsymbol{\theta}_D, \mathbf{z}]}  [\mathbf{z} | \boldsymbol{\theta}_P] [\boldsymbol{\theta}_D] [\boldsymbol{\theta}_P] -->
-<!-- \end{align*}$ -->
-
-<!-- * <p> -->
-<!--   <span style="color: #00ffff"> Posterior. </span> -->
-<!-- </p> -->
-
-<!-- * <p> -->
-<!--   <span style="color: #ff0000"> Data Model</span> -->
-<!-- </p> -->
-
-<!-- ## Model Framework -->
-
-<!-- * <p> -->
-<!--   <span> Bayesian hierarchical model. </span> -->
-<!-- </p> -->
-
-<!-- $\begin{align*} -->
-<!-- \color{cyan}{[\mathbf{z}, \boldsymbol{\theta}_D, \boldsymbol{\theta}_P | \mathbf{y}]} & \propto  -->
-<!-- \color{red}{[\mathbf{y} | \boldsymbol{\theta}_D, \mathbf{z}]}  \color{blue}{[\mathbf{z} | \boldsymbol{\theta}_P]} [\boldsymbol{\theta}_D] [\boldsymbol{\theta}_P] -->
-<!-- \end{align*}$ -->
-
-<!-- * <p> -->
-<!--   <span style="color: #00ffff"> Posterior. </span> -->
-<!-- </p> -->
-
-<!-- * <p> -->
-<!--   <span style="color: #ff0000"> Data Model. </span> -->
-<!-- </p> -->
-
-<!-- * <p> -->
-<!--   <span style="color: #0000ff"> Process Model. </span> -->
-<!-- </p> -->
-
-<!-- ## Model Framework -->
-
-<!-- * <p> -->
-<!--   <span> Bayesian hierarchical model. </span> -->
-<!-- </p> -->
 
 
 
-<!-- $\begin{align*} -->
-<!-- \color{cyan}{[\mathbf{z}, \boldsymbol{\theta}_D, \boldsymbol{\theta}_P | \mathbf{y}]} & \propto  -->
-<!-- \color{red}{[\mathbf{y} | \boldsymbol{\theta}_D, \mathbf{z}]}  \color{blue}{[\mathbf{z} | \boldsymbol{\theta}_P]} \color{orange}{[\boldsymbol{\theta}_D] [\boldsymbol{\theta}_P]} -->
-<!-- \end{align*}$ -->
 
-<!-- * <p> -->
-<!--   <span style="color: #00ffff"> Posterior. </span> -->
-<!-- </p> -->
+<!-- %% -->
+<!-- %% -->
+<!-- %% -->
+<!-- %% -->
+<!-- %% -->
+<!-- \begin{frame} -->
+<!-- \frametitle{Outline} -->
+<!-- \begin{enumerate} -->
+<!--   \item Forward models and inverse prediction of climate. -->
+<!--   \vspace{2mm} -->
+<!--   \item Reconstruction of climate from tree rings. -->
+<!--   \vspace{2mm} -->
+<!--   \item Reconstruction of water depth from testate amoebae.  -->
+<!-- \end{enumerate} -->
+<!-- \end{frame} -->
+<!-- %% -->
+<!-- %% -->
+<!-- %% -->
+<!-- \begin{frame} -->
+<!-- \frametitle{Outline} -->
+<!-- \begin{enumerate} -->
+<!--   \item Forward models and inverse prediction of climate. -->
+<!--   \vspace{2mm} -->
+<!--   \item<cover> Reconstruction of climate from tree rings. -->
+<!--   \vspace{2mm} -->
+<!--   \item<cover> Reconstruction of water depth from testate amoebae.  -->
+<!-- \end{enumerate} -->
+<!-- \end{frame} -->
+<!-- %% -->
+<!-- %% -->
+<!-- %% -->
+<!-- \begin{frame}{Forward Models} -->
+<!-- \begin{itemize} -->
+<!--   \item $\mathbf{y} = f\left(\mathbf{X}\right) + \boldsymbol{\varepsilon}$. -->
+<!--   \vspace{2mm} -->
+<!--   \item Given inputs $\mathbf{X}$, the output is $\mathbf{y}$. -->
+<!--   \vspace{2mm} -->
+<!--   \begin{itemize} -->
+<!--     \item Given a resource, an animal moves across the landscape. -->
+<!--     \vspace{2mm} -->
+<!--     \item Given climate, a tree grows. -->
+<!--   \end{itemize} -->
+<!--   \vspace{2mm} -->
+<!--   \item Mechanistic or phenomenological. -->
+<!--   \vspace{2mm} -->
+<!-- \end{itemize} -->
+<!-- \end{frame} -->
+<!-- %% -->
+<!-- %% -->
+<!-- %% -->
+<!-- \begin{frame}{Mechanistic Forward Models} -->
+<!-- \begin{itemize} -->
+<!--   \item Encode scientific ideas. -->
+<!--   \vspace{2mm} -->
+<!--   \item Test competing theories. -->
+<!--   \vspace{2mm} -->
+<!--   \item Provide structure for estimation. -->
+<!--   \vspace{2mm} -->
+<!--   \item Examples: -->
+<!--   \vspace{2mm} -->
+<!--   \begin{itemize} -->
+<!--     \item Global climate models. -->
+<!--     \vspace{2mm} -->
+<!--     \item Forest vegetation growth models. -->
+<!--     \vspace{2mm} -->
+<!--     \item Fluid dynamics models. -->
+<!--   \end{itemize} -->
+<!--   \vspace{2mm} -->
+<!-- \end{itemize} -->
+<!-- \end{frame} -->
+<!-- %% -->
+<!-- %% -->
+<!-- %% -->
+<!-- \begin{frame}{Phenomenological Forward Models} -->
+<!-- \begin{itemize} -->
+<!--   \item Data driven functional form. -->
+<!--   \vspace{2mm} -->
+<!--   \item Flexible. -->
+<!--   \vspace{2mm} -->
+<!--   \item Allow learning of underlying science. -->
+<!--   \vspace{2mm} -->
+<!--   \item Examples: -->
+<!--   \vspace{2mm} -->
+<!--   \begin{itemize} -->
+<!--     \item Semiparametric regression. -->
+<!--     \vspace{2mm} -->
+<!--     \item Gaussian processes. -->
+<!--     \vspace{2mm} -->
+<!--     \item Computer model emulators. -->
+<!--   \end{itemize} -->
+<!--   \vspace{2mm} -->
+<!-- \end{itemize} -->
+<!-- \end{frame} -->
+<!-- %% -->
+<!-- %% -->
+<!-- %% -->
+<!-- \begin{frame}{Inverse Prediction} -->
+<!-- \begin{itemize} -->
+<!--   \item Predictions are desired on $\mathbf{X}$. -->
+<!--   \vspace{2mm} -->
+<!--   \item Two solutions: -->
+<!--   \begin{itemize} -->
+<!--     \item Classical prediction - why not regress $\mathbf{X}$ on $\mathbf{y}$? -->
+<!--     \vspace{2mm} -->
+<!--     \item Inverse prediction. -->
+<!--     \vspace{2mm} -->
+<!--   \end{itemize} -->
+<!-- \end{itemize} -->
 
-<!-- * <p> -->
-<!--   <span style="color: #ff0000"> Data Model. </span> -->
-<!-- </p> -->
+<!-- \blfootnote{\fontsize{4.2}{5.04}\selectfont Clark, J.S., Bell, D.M., Kwit, M., Powell, A., \& Zhu, K. (2013). Dynamic inverse prediction and sensitivity analysis with high-dimensional responses: application to climate-change vulnerability of biodiversity. \textit{JABES}. -->
+<!-- } -->
 
-<!-- * <p> -->
-<!--   <span style="color: #0000ff"> Process Model. </span> -->
-<!-- </p> -->
+<!-- \end{frame} -->
+<!-- %% -->
+<!-- %% -->
+<!-- %% -->
+<!-- \begin{frame}{Classical Prediction} -->
+<!-- \begin{itemize} -->
+<!--   \item $\mathbf{X} = g\left(\mathbf{y}\right) + \boldsymbol{\eta}$. -->
+<!--   \vspace{2mm} -->
+<!--   \item Not true to the process that generated the data. -->
+<!--   \vspace{2mm} -->
+<!--   \item Unclear how to use mechanistic/scientific knowledge. -->
+<!--   \vspace{2mm} -->
+<!--   \item Many statistical/machine learning methods. -->
+<!--   \vspace{2mm} -->
+<!--   \item Predictions can be accurate and precise. -->
+<!-- \end{itemize} -->
+<!-- \end{frame} -->
+<!-- %% -->
+<!-- %% -->
+<!-- %% -->
+<!-- \begin{frame}{Inverse Prediction} -->
+<!-- \begin{itemize} -->
+<!--   \item $\mathbf{y} = f\left(\mathbf{X}\right) + \boldsymbol{\varepsilon}$. -->
+<!--   \vspace{2mm} -->
+<!--   \item Predict unknown $\mathbf{X}$. -->
+<!--   \vspace{2mm} -->
+<!--   \item Can result in ill-posed problems. -->
+<!--   \vspace{2mm} -->
+<!--   \item Often computationally challenging. -->
+<!--   \vspace{2mm} -->
+<!--   \item May predict with accuracy and precision. -->
+<!-- \end{itemize} -->
+<!-- \end{frame} -->
+<!-- %% -->
+<!-- %% -->
 
-<!-- * <p> -->
-<!--   <span style="color: #ff7f00"> Prior Model. </span> -->
-<!-- </p> -->
+## PalEON
 
-<!-- # Data Model -->
+<center>
+<img src="images/atlantic-1.png" alt="drawing" width="500"/> 
+</center>
 
-<!-- $\begin{align*} -->
-<!-- [\mathbf{z}, \boldsymbol{\theta}_D, \boldsymbol{\theta}_P | \mathbf{y}] & \propto  -->
-<!-- \color{red}{[\mathbf{y} | \boldsymbol{\theta}_D, \mathbf{z}]}  [\mathbf{z} | \boldsymbol{\theta}_P] [\boldsymbol{\theta}_D] [\boldsymbol{\theta}_P] -->
-<!-- \end{align*}$ -->
+\blfootnote{\tiny{\textit{http://www.theatlantic.com/science/archive/2016/03/the-worlds-most-urgent-science-project/474558}.}}
+
+## PalEON
+
+<center>
+<img src="images/paleon_logo.png" alt="drawing" width="500"/> 
+<img src="images/atlantic-2.png" alt="drawing" width="500"/> 
+</center>
 
 
-<!-- ## Data model  -->
+## Forward Model
 
-<!-- * Describes how the data are collected and observed. -->
 
-<!-- * Researchers take sediment samples from a lake. -->
+<div class="newspaper"> 
 
-<!-- * Take 1cm$^3$ cubes along the length of the sediment core. -->
+<center>
+<img src="images/model-forward.png" alt="drawing" width="500"/> 
+</center>
 
-<!-- * In each cube, researcher counts the first $N$ pollen grains and identifies to species. -->
+<hr style="height:20px; visibility:hidden;" />
 
-<!-- * Raw data are counts of each species. -->
+<center><font size="+6">Data.</font></center>
+
+<hr style="height:80px; visibility:hidden;" />
+
+<center><font size="+6">Data Model.</font></center>
+
+<hr style="height:80px; visibility:hidden;" />
+
+<center><font size="+6">Process Model.</font></center>
+
+
+<hr style="height:20px; visibility:hidden;" />
+
+</div>
+
+
+
+
+## Inverse Model
+
+
+<div class="newspaper"> 
+
+<center>
+<img src="images/model-inverse.png" alt="drawing" width="500"/> 
+</center>
+
+<hr style="height:20px; visibility:hidden;" />
+
+<center><font size="+6">Data.</font></center>
+
+<hr style="height:80px; visibility:hidden;" />
+
+<center><font size="+6">Data Model.</font></center>
+
+<hr style="height:80px; visibility:hidden;" />
+
+<center><font size="+6">Process Model.</font></center>
+
+
+<hr style="height:20px; visibility:hidden;" />
+
+</div>
+
+
+## The Data
+
+<center>
+<img src="images/introData.png" alt="drawing" width="1000"/> 
+</center>
+
+# Data Model
+
+
+$$
+{\huge
+\begin{align*}
+[\mathbf{z}, \boldsymbol{\theta}_D, \boldsymbol{\theta}_P | \mathbf{y}] & \propto
+\color{red}{[\mathbf{y} | \boldsymbol{\theta}_D, \mathbf{z}]}  [\mathbf{z} | \boldsymbol{\theta}_P] [\boldsymbol{\theta}_D] [\boldsymbol{\theta}_P]
+\end{align*}
+}%
+$$
+
+## Climate Data Model
+
+$$
+\begin{align*}
+\begin{pmatrix}
+\mathbf{T}_{t} \\ 
+\mathbf{P}_{t} 
+\end{pmatrix} = 
+ \begin{pmatrix} 
+\mathbf{T}_{\mbox{Jan}, t} \\
+\vdots \\
+\mathbf{T}_{\mbox{Dec}, t} \\
+\mathbf{P}_{\mbox{Jan}, t} \\
+\vdots \\
+\mathbf{P}_{\mbox{Dec}, t} \\ 
+\end{pmatrix}  \sim \color{red}{\mbox{N} \left( \mathbf{A} \begin{pmatrix}
+\mathbf{T}_{t-1} \\ 
+\mathbf{P}_{t-1} 
+\end{pmatrix}, \boldsymbol{\Sigma} \right).}
+\end{align*}
+$$
+
+
+<hr style="height:20px; visibility:hidden;" />
+
+* Temperature and precipitation in sequential months (years) are more related to each other than months (years) far apart.
+
+
+## Tree Ring Data Model
+
+$$
+\begin{align*}
+y_{i t j} & \sim \color{red}{\begin{cases} \mbox{N}\left(\beta_{0_j} + \beta_{1_j} f^{VS}\left(\mathbf{w}_t, \boldsymbol{\theta}^{VS}_j\right), \sigma^2_j \right) & \mbox{if } z_j = 0,\\ \mbox{N}\left(\tilde{\beta}_{0_j} + \tilde{\beta}_{1_j} f^{Pro}\left(\mathbf{w}_t, \boldsymbol{\theta}^{Pro}_j\right), \tilde{\sigma}^2_j \right) & \mbox{if } z_j = 1. \\
+\end{cases}}
+\end{align*}
+$$ 
+
+<hr style="height:20px; visibility:hidden;" />
+
+* Regress observed tree ring $y_{itj}$ onto simulated tree rings $f^{VS}\left(\mathbf{w}_t, \boldsymbol{\theta}^{VS}_j\right)$ and $f^{Pro}\left(\mathbf{w}_t, \boldsymbol{\theta}^{Pro}_j\right)$.
+
+<hr style="height:20px; visibility:hidden;" />
+
+* $z_j$ - species specific growth model form (VS or Pro).
+
+<hr style="height:20px; visibility:hidden;" />
+
+* Model chooses best growth model form for each species.
+
+
+# Process Model
+
+$$
+{\huge
+\begin{align*}
+[\mathbf{z}, \boldsymbol{\theta}_D, \boldsymbol{\theta}_P | \mathbf{y}] & \propto
+[\mathbf{y} | \boldsymbol{\theta}_D, \mathbf{z}]  \color{blue}{[\mathbf{z} | \boldsymbol{\theta}_P]}[\boldsymbol{\theta}_D] [\boldsymbol{\theta}_P]
+\end{align*}
+}
+$$
+
+## Tree Ring Growth Model
+
+<center>
+<img src="images/rampFunction.png" alt="drawing" width="500"/> 
+</center>
+
+<hr style="height:20px; visibility:hidden;" />
+
+$$
+\begin{align*}
+f^{\ell}\left(\mathbf{w}_t, \boldsymbol{\theta}^{\ell}_j\right) & = \color{blue}{ \sum_{s=1}^{12} \chi_s \mbox{min} \left(
+              g^{\ell}\left( T_{t,s},
+              \boldsymbol{\theta}^{\ell}_j \right),
+              g^{\ell}\left( P_{t, s},
+              \boldsymbol{\theta}^{\ell}_j \right) \right),} \\
+              & \ell = VS \mbox{ or } Pro. 
+\end{align*}
+$$
+
+## Tree Ring Growth Model
+
+```{r, cache=TRUE, fig.show="animate", fig.align = "center", interval=0.5}
+load('~/treeRing/datafiles/hudsonValleyData.RData')
+dd_temp<-data.frame(year=Temp.avg.dat[, 1], month = Temp.avg.dat[, 2], temp=apply(Temp.avg.dat[, 3:36], 1, mean))
+dd_temp <- dd_temp[order(dd_temp$year, dd_temp$month), ]
+dd_precip<-data.frame(year=Precip.dat[, 1], month = Precip.dat[, 2], precip=apply(Precip.dat[, 3:36], 1, mean))
+dd_precip <- dd_precip[order(dd_precip$year, dd_precip$month), ]
+dd_temp <-dd_temp[1:36, ]
+dd_temp[, 3] <- (dd_temp[, 3] - mean(dd_temp[, 3])) / sd(dd_temp[, 3])
+dd_precip <-dd_precip[1:36, ]
+dd_precip[, 3] <- (log(dd_precip[, 3]) - mean(log(dd_precip[, 3]))) / sd(log(dd_precip[, 3]))
+growth <- rep(NA, length(dd_temp$month))
+for(i in 1:length(dd_temp$month)){
+	growth[i] <- min(pnorm(dd_precip[,  3][i], 0, 1), 
+									 pnorm(dd_temp[, 3][i], 0, 1))
+}
+# growth <- (growth - mean(growth)) / sd(growth)
+growth <- growth / sd(growth)
+growth_year <- rep(NA, 36)
+growth_year[1:12] <- cumsum(growth[1:12])
+growth_year[13:24] <- cumsum(growth[13:24])
+growth_year[25:36] <- cumsum(growth[25:36])
+growth_year <- 4*growth_year / max(growth_year)
+for(i in 1:36){
+# 	jpeg(file = paste('growthAnimationMultiscale', i, '.jpg', sep=''), width = 16, height = 9, quality = 100, res = 600, units = 'in')
+	par(mar=c(5, 4, 4, 2) + 0.1 + c(0, 2, 0, 0))
+	layout(matrix(c(1,2,3,4,5,6), 2, 3, byrow = TRUE))
+# 	layout(matrix(c(1,1,2,2,3,3,4,4,5,5,6,6), 2, 6, byrow = TRUE))
+	matplot(dd_temp[1:12,  3], type = 'l', xlab = "Month", ylab = "Climate Anomaly", ylim = c(-3, 3.5), col="red", main = "Year 1", cex.lab = 3, cex.main=3, cex.axis=2)
+	# legend(3.5, -0.5, c("Temp", "Precip", "Growth"), col=c("red", "blue", "black"), lty = c(1,1,1), bty="n", cex = 2.5)
+	lines(dd_precip[1:12,  3], col="blue")
+  lines(growth[1:12])
+  if(i < 13) {
+  	points(i, dd_temp[, 3][i], col="red", pch=16, cex = 2)
+    points(i, dd_precip[,  3][i], col="blue", pch=16, cex=2)
+    points(i, growth[i], col = "black", pch=16, cex=2)
+  }
+
+  matplot(dd_temp[13:24,  3], type = 'l', xlab = "Month", ylab="", ylim = c(-3, 3.5), col="red", main = "Year 2", cex.lab = 3, cex.main=3, cex.axis=2)
+ 	# legend(3.5, -0.5, c("Temp", "Precip", "Growth"), col=c("red", "blue", "black"), lty = c(1,1,1), bty="n", cex = 2.5)
+  lines(dd_precip[13:24,  3], col="blue")
+  lines(growth[13:24])
+  if(i > 12 && i < 25){
+  	points(i-12, dd_temp[,  3][i], col="red", pch=16, cex = 2)
+  	points(i-12, dd_precip[,  3][i], col="blue", pch=16, cex=2)
+  	points(i-12, growth[i], col = "black", pch=16, cex=2)
+  }
+
+	matplot(dd_temp[25:36,  3], type = 'l', xlab = "Month", ylab="", ylim = c(-3, 3.5), col="red", main = "Year 3", cex.lab = 3, cex.main=3, cex.axis=2)
+	# legend(3.5, -0.5, c("Temp", "Precip", "Growth"), col=c("red", "blue", "black"), lty = c(1,1,1), bty="n", cex = 2.5)
+	lines(dd_precip[25:36,  3], col="blue")
+	lines(growth[25:36])
+	if(i > 24){
+		points(i-24, dd_temp[,  3][i], col="red", pch=16, cex = 2)
+		points(i-24, dd_precip[,  3][i], col="blue", pch=16, cex=2)
+		points(i-24, growth[i], col = "black", pch=16, cex=2)
+	}
+	
+	
+	curve(pnorm(x, 0, 1), from = -3, to = 3, main = 'Monthly Growth T', 
+				ylab = "Growth", xlab = "Temp", cex.main = 3, cex.lab=2.75, cex.axis=2)
+	points(dd_temp[,  3][i], 
+				 pnorm(dd_temp[,  3][i], 0, 1), col="red",
+				 pch=16, cex=2)
+	# 		abline(h=pnorm(dd_temp[which(dd_temp$month == 5),  3][i], 14, 1), col="red")
+	
+	curve(pnorm(x, 0, 1), from = -3, to = 3, main = 'Monthly Growth P', 
+				ylab="", xlab = "Precip", cex.main = 3, cex.lab=2.75, cex.axis=2)
+	points(dd_precip[,  3][i], 
+				 pnorm(dd_precip[,  3][i], 0, 1), col="blue",
+				 pch=16, cex=2)
+	# 		abline(h=pnorm(log(dd_precip[which(dd_precip$month == 5),  3][i]), 4, 0.35), col="red")
+	
+	plot(x=c(0.5,3.5), y = c(0,4.5), type = 'n', xlab = "Year", ylab="", xaxt="n", main = "Annual Growth", cex.main = 3, cex.lab=2.75, cex.axis=2)
+	axis(1, at=1:3, cex.axis=2)
+	if(i < 13){
+		if(i > 1){
+			for(j in 1:i){
+				points(1, growth_year[j], pch = 16, cex=2, col=adjustcolor("black", alpha.f = 0.25))
+			}
+		}
+	}
+	
+	if(i > 12 && i < 25){
+		for(j in 1:12){
+			points(1, growth_year[j], pch = 16, cex=2, col=adjustcolor("black", alpha.f = 0.25))
+		}
+		for(j in 13:i){
+			points(2, growth_year[j], pch = 16, cex=2, col=adjustcolor("black", alpha.f = 0.25))
+		}
+	}
+	
+	if(i > 24){
+		for(j in 1:12){
+			points(1, growth_year[j], pch = 16, cex=2, col=adjustcolor("black", alpha.f = 0.25))
+		}
+		for(j in 13:24){
+			points(2, growth_year[j], pch = 16, cex=2, col=adjustcolor("black", alpha.f = 0.25))
+		}
+		for(j in 25:i){
+			points(3, growth_year[j], pch = 16, cex=2, col=adjustcolor("black", alpha.f = 0.25))
+		}
+	}
+	lines(0:4, c(3.5, growth_year[12], growth_year[24], growth_year[36], 3.3))
+	
+}
+```
+
+
+## The Inverse Problem
+
+```{r, cache=TRUE, fig.show="animate", fig.align = "center", interval=0.5}
+set.seed(104)
+
+iter <- 20
+banana <- vector('list', length = iter)
+
+intersection <- matrix(rnorm(2000, 0, 0.1), 1000, 2)
+r <- 8
+full <- 2 * (0:1000) / 1000 * pi ## points from 0 to 2 * pi
+center <- matrix(0, 2, 1000)
+for(i in 1:1000){
+	center[, i] <- c(r * cos(full[i]) + intersection[i, 1], r * sin(full[i]) + intersection[i, 2])
+}
+
+idx <- sample(50:150, iter)
+layout(1)
+for(i in 1:iter){
+	banana[[i]] <- cbind(r * cos(full) + center[1, idx[i]], r * sin(full) + center[2, idx[i]])
+	par(mar=c(5, 4, 4, 2) + 0.1 + c(0, 2, 0, 0))
+	plot(c(-2, 2 ), c(-2, 2), type = 'n', ylab = 'Temperature',
+			 xlab = 'Precipitation', cex.lab=2, cex.axis=2, las=1)
+	if (i == 1) {
+		## Plot the first curve darker
+		polygon(c(banana[[i]][, 1], rev(banana[[i]][, 1]) + 0.1), 
+						c(banana[[i]][, 2], rev(banana[[i]][, 2]) + 0.1),
+						col = rgb(153/255,153/255,153/255, 0.5), border = NA)
+		polygon(c(banana[[i]][, 1], rev(banana[[i]][, 1]) - 0.1),
+						c(banana[[i]][, 2], rev(banana[[i]][, 2]) - 0.1),
+						col = rgb(153/255,153/255,153/255, 0.5), border = NA)
+		
+	} else {
+		for(j in 1:i){
+			polygon(c(banana[[j]][, 1], rev(banana[[j]][, 1]) + 0.1), 
+							c(banana[[j]][, 2], rev(banana[[j]][, 2]) + 0.1),
+							col = rgb(153/255,153/255,153/255, 0.075), border = NA)
+			polygon(c(banana[[j]][, 1], rev(banana[[j]][, 1]) - 0.1),
+							c(banana[[j]][, 2], rev(banana[[j]][, 2]) - 0.1),
+							col = rgb(153/255,153/255,153/255, 0.075), border = NA)
+		}
+	}
+}
+```
+
+# Prior Model
+
+$$
+{\huge
+\begin{align*}
+[\mathbf{z}, \boldsymbol{\theta}_D, \boldsymbol{\theta}_P | \mathbf{y}] & \propto
+[\mathbf{y} | \boldsymbol{\theta}_D, \mathbf{z}]  [\mathbf{z} | \boldsymbol{\theta}_P]\color{orange}{[\boldsymbol{\theta}_D] [\boldsymbol{\theta}_P]}
+\end{align*}
+}
+$$
+
+## Prior model
+
+* Assumes growth responses follow "ecological niche."
+
+* Tree species that grow in the Hudson Valley respond to similar climate so have similar responses.
+
+* Variations from common response are to exploit an "ecological niche" that allows many species to exist on the same landscape.
+
+## Ecological Niche
+
+<center>
+<img src="images/growthCaterpillar.png" alt="drawing" width="900"/> 
+</center>
+
+
+
+# Simulation Study 
+
+<!-- * Simulate tree ring data sets. -->
+<!-- * Fit model and predict missing climate. -->
+
+## Simulation Study
+
+<center>
+<img src="images/simProbitfitProbitTrend.png" alt="drawing" width="1000"/> 
+</center>
+
+
+## Why is the temperature reconstruction poor?
+
+<center>
+<img src="images/temperatureParameters.png" alt="drawing" width="1000"/> 
+</center>
+
+
+
+## Reconstruction
+
+<center>
+<img src="images/fitHudson1.png" alt="drawing" width="750"/> 
+</center>
+
+## Reconstruction
+<center>
+<img src="images/fitHudson2.png" alt="drawing" width="750"/> 
+</center>
+
+
+
+
+
+
+
+
+
+
+# Pollen Data
+
+## Pollen Data
+
+```{r, out.width='95%', echo=FALSE}
+knitr::include_graphics(here("images", "pollen.png"))
+```
+
+## Pollen Data
+
+```{r, out.width='95%', echo=FALSE}
+knitr::include_graphics(here("images", "pollen-locations.png"))
+```
+
+## Fossil Pollen Data
+
+```{r, out.width='95%', echo=FALSE}
+knitr::include_graphics(here("images", "fossil-pollen-locations.png"))
+```
+
+
+
+
+# Data Model
+
+$$
+{\huge
+\begin{align*}
+[\mathbf{z}, \boldsymbol{\theta}_D, \boldsymbol{\theta}_P | \mathbf{y}] & \propto
+\color{red}{[\mathbf{y} | \boldsymbol{\theta}_D, \mathbf{z}]}  [\mathbf{z} | \boldsymbol{\theta}_P] [\boldsymbol{\theta}_D] [\boldsymbol{\theta}_P]
+\end{align*}
+}
+$$
+
+
+## Data Model
+
+$$
+\begin{align*}
+\mathbf{y}\left( \mathbf{s}_i, t \right) & \sim \color{red}{\operatorname{Dirichlet-Multinomial} \left( N, \exp \left(\mathbf{z}\left( \mathbf{s}_i, t \right) \boldsymbol{\beta} \right)\right)}
+\end{align*}
+$$
+
+<hr style="height:20px; visibility:hidden;" />
+
+* Researchers take 1cm$^3$ cubes sediment samples along the length of a sediment core from a lake.
+
+<hr style="height:20px; visibility:hidden;" />
+
+* Raw data are counts of each species $y(\mathbf{s}_i, t)$ at site $\mathbf{s}_i$ for time $t$.
+
+<hr style="height:20px; visibility:hidden;" />
+
+* In each cube, researcher counts the first $N$ pollen grains and identifies to species.
+
+<hr style="height:20px; visibility:hidden;" />
+
+* Climate variable $\mathbf{z}(\mathbf{s}_i, t)$ at site $\mathbf{s}_i$ for time $t$.
+    * **Only known for time $t=1$**.
+
 
 
 <!-- ## Data Model -->
 
-<!-- For location $\mathbf{s}$ and time $t$,  -->
+<!-- For location $\mathbf{s}$ and time $t$, -->
 
 <!-- $\begin{align*} -->
 <!-- \mathbf{y} \left( \mathbf{s}_i, t \right) & = \left( y_{1} \left( \mathbf{s}_i, t \right), \ldots, y_{d} \left( \mathbf{s}_i, t \right) \right)' -->
@@ -1373,7 +1880,7 @@ $$
 <!-- * $y_{j} \left( \mathbf{s}_i, t \right)$ is the count of species $j$ in the sample at location $\mathbf{s}_i$ and time $t$. -->
 
 <!-- * Compositional count data. -->
-<!--    * Total count is not informative of the absolute composition.  -->
+<!--    * Total count is not informative of the absolute composition. -->
 <!--    * Informative of the relative proportions $p_{j} \left( \mathbf{s}_i, t \right)$ only. -->
 
 <!-- ## Data Model -->
@@ -1430,7 +1937,7 @@ $$
 
 <!-- <br /> -->
 
-<!-- * $\mathbf{z}\left( \mathbf{s}_i, t \right)$' is a $q$-dimensional vector of covariates.  -->
+<!-- * $\mathbf{z}\left( \mathbf{s}_i, t \right)$' is a $q$-dimensional vector of covariates. -->
 
 <!-- <br /> -->
 
@@ -1480,164 +1987,161 @@ $$
 
 <!-- <br /> -->
 
-<!-- ## Calibration Model -->
+## Data Model
 
-<!-- ```{r, out.width='95%', echo=FALSE} -->
-<!-- knitr::include_graphics(here("images", "pollen-linear-fit.png")) -->
-<!-- ``` -->
+```{r, out.width='95%', echo=FALSE}
+knitr::include_graphics(here("images", "pollen-linear-fit.png"))
+```
 
 
-<!-- ## Non-linear Calibration Model -->
+## Non-linear Data Model
 
-<!-- * Vegetation response to climate is non-linear. -->
+* Vegetation response to climate is non-linear.
 
-<!-- <hr style="height:8px; visibility:hidden;" /> -->
+* Pollen are "aggregated" into groups across space and taxonomy.
 
-<!-- $\begin{align*} -->
-<!-- \operatorname{log} \left( \boldsymbol{\alpha} \left( \mathbf{s}_i, t \right) \right) & = \mathbf{B} \left( \mathbf{z}\left( \mathbf{s}_i, t \right) \right) \boldsymbol{\beta} -->
-<!-- \end{align*}$ -->
+    * "Niche" responses in the groups can produce multi-modal responses.
 
-<!-- <hr style="height:8px; visibility:hidden;" /> -->
+<hr style="height:8px; visibility:hidden;" />
 
-<!-- * $\mathbf{B} \left( \mathbf{z}\left( \mathbf{s}_i, t \right) \right)$ is a basis expansion of the covariates $\mathbf{z}\left( \mathbf{s}_i, t \right)$. -->
-<!--     * Use B-splines or Gaussian Processes as a basis. -->
-<!--     * $\mathbf{B} \left( \mathbf{z}\left( \mathbf{s}_i, t \right) \right)$ is random.   -->
-<!--     * Computationally challenging. -->
+$$
+\begin{align*}
+\mathbf{y}\left( \mathbf{s}_i, t \right) & \sim \color{red}{\operatorname{Dirichlet-Multinomial} \left( N, \exp\left( \mathbf{B} \left( \mathbf{z}\left( \mathbf{s}_i, t \right) \right) \boldsymbol{\beta} \right) \right)}
+\end{align*}
+$$
 
-<!-- <br /> -->
 
-<!-- * Note that for $t \neq 1$, the $\mathbf{z} \left( \mathbf{s}_i, t \right)$s are unobserved. -->
+<hr style="height:8px; visibility:hidden;" />
 
-<!-- <br /> -->
+* $\mathbf{B} \left( \mathbf{z}\left( \mathbf{s}_i, t \right) \right)$ is a basis expansion of the covariates $\mathbf{z}\left( \mathbf{s}_i, t \right)$.
+    * Use B-splines or Gaussian Processes as a basis.
+    * $\mathbf{B} \left( \mathbf{z}\left( \mathbf{s}_i, t \right) \right)$ is random.
+    * Computationally challenging.
 
+<br />
 
+* For $t \neq 1$, the $\mathbf{z} \left( \mathbf{s}_i, t \right)$s are unobserved.
 
-<!-- ## Non-linear Calibration Model -->
+<br />
 
-<!-- ```{r, out.width='95%', echo=FALSE} -->
-<!-- knitr::include_graphics(here("images", "pollen-fit.png")) -->
-<!-- ``` -->
 
-<!-- # Process Model -->
 
-<!-- $\begin{align*} -->
-<!-- [\mathbf{z}, \boldsymbol{\theta}_D, \boldsymbol{\theta}_P | \mathbf{y}] & \propto  -->
-<!-- [\mathbf{y} | \boldsymbol{\theta}_D, \mathbf{z}]  \color{blue}{[\mathbf{z} | \boldsymbol{\theta}_P]}[\boldsymbol{\theta}_D] [\boldsymbol{\theta}_P] -->
-<!-- \end{align*}$ -->
+## Non-linear Calibration Model
 
-<!-- ## Process Model | Dynamic Model -->
-<!-- * We are interested in estimating the latent process $\mathbf{z} \left( \mathbf{s}, t \right)$. -->
+```{r, out.width='95%', echo=FALSE}
+knitr::include_graphics(here("images", "pollen-fit.png"))
+```
 
-<!-- <br /> -->
+# Process Model
 
-<!-- * The model can accommodate: -->
-<!--    1) continuous vs. discrete space (geostatistical vs. CAR models). -->
-<!--    2) continuous vs. discrete time (stochastic process vs. AR models). -->
+$$
+{\huge
+\begin{align*}
+[\mathbf{z}, \boldsymbol{\theta}_D, \boldsymbol{\theta}_P | \mathbf{y}] & \propto
+[\mathbf{y} | \boldsymbol{\theta}_D, \mathbf{z}]  \color{blue}{[\mathbf{z} | \boldsymbol{\theta}_P]}[\boldsymbol{\theta}_D] [\boldsymbol{\theta}_P]
+\end{align*}
+}
+$$
 
-<!-- <br /> -->
+## Process Model | Dynamic Model
+* We are interested in estimating the latent process $\mathbf{z} \left( \mathbf{s}, t \right)$.
 
-<!-- * For now, we focus on continuous space and discrete time. -->
 
-<!-- ## Dynamic Model -->
+$$\
+\begin{align*}
+\color{blue}{\mathbf{z} \left(t \right) - \mathbf{X} \left( t \right) \boldsymbol{\gamma}} & \sim \color{blue}{\operatorname{N}\left(\mathbf{M}\left(t\right) \left( \mathbf{z} \left(t-1 \right) - \mathbf{X} \left( t \right) \boldsymbol{\gamma} \right), \boldsymbol{R}\left( \boldsymbol{\theta} \right) \right)}
+\end{align*}
+$$
 
-<!-- * For $\mathbf{z} \left(t \right) = \left( \mathbf{z} \left(\mathbf{s}_1, t \right)', \ldots,  \mathbf{z} \left(\mathbf{s}_n, t \right)' \right)$, we assume: -->
+<hr style="height:20px; visibility:hidden;" />
 
-<!-- <hr style="height:8px; visibility:hidden;" /> -->
+* Assumes climate states nearby in time are more correlated than those further apart in time.
 
-<!-- $\begin{align*} -->
-<!-- \mathbf{z} \left(t \right) - \mathbf{X} \left( t \right) \boldsymbol{\gamma} & = \mathbf{M}\left(t\right) \left( \mathbf{z} \left(t-1 \right) - \mathbf{X} \left( t \right) \boldsymbol{\gamma} \right) + \boldsymbol{\eta} \left(t \right) -->
-<!-- \end{align*}$ -->
+<hr style="height:20px; visibility:hidden;" />
 
-<!-- <hr style="height:8px; visibility:hidden;" /> -->
+* $\mathbf{X} \left(t \right) \boldsymbol{\gamma}$ are the fixed effects from covariates like latitude, elevation, etc.
 
-<!-- * $\mathbf{M}(t) = \rho \mathbf{I}_n$ is a propagator matrix. -->
 
-<!-- * $\mathbf{X} \left(t \right) \boldsymbol{\gamma}$ are the fixed effects from covariates like latitude, elevation, etc. -->
+## Elevation covariates
 
-<!-- * $\boldsymbol{\eta} \left( t \right) \sim \operatorname{N} \left( \mathbf{0}, \mathbf{R}\left( \boldsymbol{\theta} \right) \right)$. -->
+```{r, out.width='95%', echo=FALSE}
+# knitr::include_graphics(here("images", "pollen-simulation.png"))
+knitr::include_graphics("./images/elevation.png")
+```
 
-<!-- * $\mathbf{R} \left( \boldsymbol{\theta} \right)$ is a Mátern spatial covariance matrix with parameters $\boldsymbol{\theta}$. -->
+## Scaling the process for big data
 
-<!-- ## Elevation covariates -->
+* Define a set of spatial knot locations $\mathbf{s}^{\star} = \left\{ \mathbf{s}_1^{\star}, \ldots, \mathbf{s}_m^{\star} \right\}$.
 
-<!-- ```{r, out.width='95%', echo=FALSE} -->
-<!-- # knitr::include_graphics(here("images", "pollen-simulation.png")) -->
-<!-- knitr::include_graphics("./images/elevation.png") -->
-<!-- ``` -->
+<hr style="height:8px; visibility:hidden;" />
 
-<!-- ## Scaling the process for big data -->
+* $\boldsymbol{\eta}^{\star} \left( t \right) \sim \operatorname{N} \left( \mathbf{0}, \mathbf{R}^{\star}\left( \boldsymbol{\theta} \right) \right)$.
 
-<!-- * Define a set of spatial knot locations $\mathbf{s}^{\star} = \left\{ \mathbf{s}_1^{\star}, \ldots, \mathbf{s}_m^{\star} \right\}$. -->
+<hr style="height:8px; visibility:hidden;" />
 
-<!-- <hr style="height:8px; visibility:hidden;" /> -->
+* $\mathbf{R}^{\star}\left( \boldsymbol{\theta} \right)$ is the spatial covariance defined at the knot locations $\mathbf{s}^{\star}$.
 
-<!-- * $\boldsymbol{\eta}^{\star} \left( t \right) \sim \operatorname{N} \left( \mathbf{0}, \mathbf{R}^{\star}\left( \boldsymbol{\theta} \right) \right)$. -->
+<hr style="height:8px; visibility:hidden;" />
 
-<!-- <hr style="height:8px; visibility:hidden;" /> -->
+* The linear interpolator from observed location $\mathbf{s}_i$ to knot location $\mathbf{s}_j^{\star}$ is $\mathbf{r} \left(\mathbf{s}_i, \mathbf{s}_j^{\star} \right) \mathbf{R}^{\star}\left( \boldsymbol{\theta} \right)^{-1}$ where $\mathbf{r} \left(\mathbf{s}_i, \mathbf{s}_j^{\star} \right)
+=  \operatorname{Cov} \left(\mathbf{s}_i, \mathbf{s}_j^{\star} \right)$
 
-<!-- * $\mathbf{R}^{\star}\left( \boldsymbol{\theta} \right)$ is the spatial covariance defined at the knot locations $\mathbf{s}^{\star}$. -->
+<hr style="height:8px; visibility:hidden;" />
 
-<!-- <hr style="height:8px; visibility:hidden;" /> -->
+<font size="3">
+`r capture.output(print(biblio["banerjee2008gaussian"]))`
+</font>
 
-<!-- * The linear interpolator from observed location $\mathbf{s}_i$ to knot location $\mathbf{s}_j^{\star}$ is $\mathbf{r} \left(\mathbf{s}_i, \mathbf{s}_j^{\star} \right) \mathbf{R}^{\star}\left( \boldsymbol{\theta} \right)^{-1}$ where $\mathbf{r} \left(\mathbf{s}_i, \mathbf{s}_j^{\star} \right)  -->
-<!-- =  \operatorname{Cov} \left(\mathbf{s}_i, \mathbf{s}_j^{\star} \right)$ -->
+## Predictive Process
 
-<!-- <hr style="height:8px; visibility:hidden;" /> -->
+* $\boldsymbol{\eta} \left( t \right) \approx \mathbf{r} \left(\mathbf{s}, \mathbf{s}^{\star} \right) \mathbf{R}^{\star}\left( \boldsymbol{\theta} \right)^{-1} \tilde{\boldsymbol{\eta}} \left( t \right)$.
 
-<!-- <font size="3"> -->
-<!-- `r capture.output(print(biblio["banerjee2008gaussian"]))` -->
-<!-- </font> -->
+* The predictive process can be shown to be the optimal predictor of the parent process $\boldsymbol{\eta} \left( t \right)$ of dimension $m$
 
-<!-- ## Predictive Process -->
+* The dynamic climate process becomes
 
-<!-- * $\boldsymbol{\eta} \left( t \right) \approx \mathbf{r} \left(\mathbf{s}, \mathbf{s}^{\star} \right) \mathbf{R}^{\star}\left( \boldsymbol{\theta} \right)^{-1} \tilde{\boldsymbol{\eta}} \left( t \right)$. -->
+$\begin{align*}
+\mathbf{z} \left(t \right) - \mathbf{X} \left( t \right) \boldsymbol{\gamma} & \approx \mathbf{M}\left(t\right) \left( \mathbf{z} \left(t-1 \right) - \mathbf{X} \left( t \right) \boldsymbol{\gamma} \right) + \mathbf{r} \left(\mathbf{s}, \mathbf{s}^{\star} \right) \mathbf{R}^{\star}\left( \boldsymbol{\theta} \right)^{-1} \boldsymbol{\tilde{\eta}} \left(t \right)
+\end{align*}$
 
-<!-- * The predictive process can be shown to be the optimal predictor of the parent process $\boldsymbol{\eta} \left( t \right)$ of dimension $m$  -->
 
-<!-- * The dynamic climate process becomes -->
 
-<!-- $\begin{align*} -->
-<!-- \mathbf{z} \left(t \right) - \mathbf{X} \left( t \right) \boldsymbol{\gamma} & \approx \mathbf{M}\left(t\right) \left( \mathbf{z} \left(t-1 \right) - \mathbf{X} \left( t \right) \boldsymbol{\gamma} \right) + \mathbf{r} \left(\mathbf{s}, \mathbf{s}^{\star} \right) \mathbf{R}^{\star}\left( \boldsymbol{\theta} \right)^{-1} \boldsymbol{\tilde{\eta}} \left(t \right) -->
-<!-- \end{align*}$ -->
+## Time Uncertainty
 
+* Each fossil pollen observation includes estimates of time uncertainty.
+    * The time of the observation is uncertain.
+    * Weight the likelihoods according to age-depth model.
+    * Posterior distribution of ages.
 
+<br />
 
-<!-- ## Time Uncertainty -->
+* For each observation fossil pollen observation an age-depth model gives a posterior distribution over dates.
+    * Define $\omega \left(\mathbf{s}_i, t \right)$ as P(age $\in (t-1, t)$).
+    * $[\mathbf{y} \left( \mathbf{s}_i, t \right) | \boldsymbol{\alpha} \left( \mathbf{s}_i, t \right) ] = \prod_{t=1}^T [\mathbf{y} \left( \mathbf{s}_i, t \right) | \boldsymbol{\alpha} \left( \mathbf{s}, t \right)]^{\omega_\left(\mathbf{s}_i, t \right)}$.
 
-<!-- * Each fossil pollen observation includes estimates of time uncertainty. -->
-<!--     * The time of the observation is uncertain. -->
-<!--     * Weight the likelihoods according to age-depth model. -->
-<!--     * Posterior distribution of ages. -->
+# Implementation
 
-<!-- <br /> -->
+## gitHub package
 
-<!-- * For each observation fossil pollen observation an age-depth model gives a posterior distribution over dates. -->
-<!--     * Define $\omega \left(\mathbf{s}_i, t \right)$ as P(age $\in (t-1, t)$).  -->
-<!--     * $[\mathbf{y} \left( \mathbf{s}_i, t \right) | \boldsymbol{\alpha} \left( \mathbf{s}_i, t \right) ] = \prod_{t=1}^T [\mathbf{y} \left( \mathbf{s}_i, t \right) | \boldsymbol{\alpha} \left( \mathbf{s}, t \right)]^{\omega_\left(\mathbf{s}_i, t \right)}$. -->
+* Non-spatial code available as a [gitHub package](https://github.com/jtipton25/BayesComposition).
 
-<!-- # Implementation -->
+```{r, eval=FALSE, echo=TRUE}
+devtools::install_github("jtipton25/BayesComposition")
+```
 
-<!-- ## gitHub package -->
+<br />
 
-<!-- * Non-spatial code available as a [gitHub package](https://github.com/jtipton25/BayesComposition). -->
+* Includes options for multiple models including:
+    * mixture models.
+    * different likelihoods and link functions.
+    * correlations in functional response.
 
-<!-- ```{r, eval=FALSE, echo=TRUE} -->
-<!-- devtools::install_github("jtipton25/BayesComposition") -->
-<!-- ``` -->
+<br />
 
-<!-- <br /> -->
+* Code in `C++` using `Rcpp` package for computation speed.
 
-<!-- * Includes options for multiple models including: -->
-<!--     * mixture models. -->
-<!--     * different likelihoods and link functions. -->
-<!--     * correlations in functional response. -->
 
-<!-- <br /> -->
-
-<!-- * Code in `C++` using `Rcpp` package for computation speed. -->
-
-
-<!-- ## Computational Details  -->
+<!-- ## Computational Details -->
 
 <!-- * The model is fit in stages: -->
 
@@ -1709,7 +2213,7 @@ $$
 <!--     * Predictive process representation. -->
 <!--     * Reduced computation cost $O(d T \frac{m^3}{3})$ -->
 
-<!-- <!-- ## Elliptical Slice Sampling for DLMs --> -->
+<!-- ## Elliptical Slice Sampling for DLMs -->
 
 
 
@@ -1717,305 +2221,276 @@ $$
 <!-- `r capture.output(print(biblio["tipton2018mvgp"]))` -->
 <!-- </font> -->
 
-<!-- # Simulation Study -->
+# Simulation Study
 
-<!-- ## Simuated data -->
+## Simuated data
 
-<!-- ```{r, out.width='95%', echo=FALSE} -->
-<!-- # knitr::include_graphics(here("images", "pollen-simulation.png")) -->
-<!-- knitr::include_graphics("./images/pollen-simulation.png") -->
-<!-- ``` -->
-
-
-<!-- ## Simulated Reconstruction -->
+```{r, out.width='95%', echo=FALSE}
+# knitr::include_graphics(here("images", "pollen-simulation.png"))
+knitr::include_graphics("./images/pollen-simulation.png")
+```
 
 
-<!-- ```{r, echo=FALSE} -->
-<!-- load("~/Google Drive/spatial-pollen/fit/sim-kriging-elevation.RData") -->
-<!-- load("~/Google Drive/spatial-pollen/climate-sim-nimble.RData") -->
-<!-- N <- sqrt(nrow(Z_pred_full)) -->
-<!-- tt <- dim(Z_pred_full)[2] -->
-<!-- ``` -->
+## Simulated Reconstruction
 
 
-
-<!-- ```{r sim-animation, fig.show='animate', cache=TRUE, echo=FALSE, interval=0.5} -->
-<!-- dat_pred <- data.frame( -->
-<!--   estimate         = c(Z_pred_full), -->
-<!--   truth            = c(climate[, 2:(tt+1)]), -->
-<!--   anomaly          = c(climate[, 2:(tt+1)] - climate[, 1]),  -->
-<!--   anomaly_estimate = c(Z_pred_full - climate[, 1]), -->
-<!--   lat              = locs[, 1],  -->
-<!--   long             = locs[, 2],  -->
-<!--   year             = factor(rep(2:(tt+1), each=nrow(climate)))) -->
-<!-- zlims <- range(range(dat_pred$estimate), range(dat_pred$truth)) -->
-<!-- alims <- range(range(dat_pred$anomaly), range(dat_pred$anomaly_estimate)) -->
-
-
-<!-- for (t in 2:(tt+1)) { -->
-<!--   g_truth <- ggplot(data = subset(dat_pred, year==t), -->
-<!--                       aes(x = long, y = lat, fill = truth)) + -->
-<!--     geom_tile() + -->
-<!--     # geom_point(data = dat_fossil_climate, aes(x = long, y = lat, fill=X, color=X), -->
-<!--     #            size=0.25, alpha=1.0, inherit.aes=FALSE) + -->
-<!--     scale_fill_gradient2(low = "blue", mid="white", midpoint = sum(zlims)/2,  -->
-<!--                          high = "red", limits=zlims) + -->
-<!--         # scale_color_brewer(palette = "RdYlBu") + -->
-<!--     xlab("Longitude") + -->
-<!--     ylab("Latitude") + -->
-<!--     ggtitle(paste("Simulated climate for time", 250 * (t-1), "to",  250 * (t))) + -->
-<!--     theme_bw() +  -->
-<!--       theme(legend.position = "bottom") -->
-
-<!--   g_estimate <- ggplot(data = subset(dat_pred, year==t), -->
-<!--                       aes(x = long, y = lat, fill = estimate)) + -->
-<!--     geom_tile() + -->
-<!--     # geom_point(data = dat_fossil_climate, aes(x = long, y = lat, fill=X, color=X), -->
-<!--     #            size=0.25, alpha=1.0, inherit.aes=FALSE) + -->
-<!--     scale_fill_gradient2(low = "blue", mid="white", midpoint = sum(zlims)/2,  -->
-<!--                          high = "red", limits=zlims) + -->
-<!--         # scale_color_brewer(palette = "RdYlBu") + -->
-<!--     xlab("Longitude") + -->
-<!--     ylab("Latitude") + -->
-<!--     ggtitle(paste("Estimated climate for time", 250 * (t-1), "to",  250 * (t))) + -->
-<!--     theme_bw() +  -->
-<!--       theme(legend.position = "bottom") -->
-
-<!--     # g_anomaly_truth <- ggplot(data = subset(dat_pred, year==t), -->
-<!--     #                   aes(x = long, y = lat, fill = anomaly)) + -->
-<!--     # geom_tile() + -->
-<!--     # # geom_point(data = dat_fossil_climate, aes(x = long, y = lat, fill=X, color=X), -->
-<!--     # #            size=0.25, alpha=1.0, inherit.aes=FALSE) + -->
-<!--     # scale_fill_gradient2(low = "blue", mid="white", midpoint = sum(alims)/2, -->
-<!--     #                      high = "red", limits = alims) + -->
-<!--     #     # scale_color_brewer(palette = "RdYlBu") + -->
-<!--     # xlab("Longitude") + -->
-<!--     # ylab("Latitude") + -->
-<!--     # ggtitle(paste("Simulated climate anomaly for time", 250 * (t-1), "to",  250 * (t))) + -->
-<!--     # theme_bw() +  -->
-<!--     #   theme(legend.position = "bottom") -->
-<!--     #  -->
-<!--     #     g_anomaly_estimate <- ggplot(data = subset(dat_pred, year==t), -->
-<!--     #                   aes(x = long, y = lat, fill = anomaly_estimate)) + -->
-<!--     # geom_tile() + -->
-<!--     # # geom_point(data = dat_fossil_climate, aes(x = long, y = lat, fill=X, color=X), -->
-<!--     # #            size=0.25, alpha=1.0, inherit.aes=FALSE) + -->
-<!--     # scale_fill_gradient2(low = "blue", mid="white", midpoint = sum(alims)/2, -->
-<!--     #                      high = "red", limits = alims) + -->
-<!--     #     # scale_color_brewer(palette = "RdYlBu") + -->
-<!--     # xlab("Longitude") + -->
-<!--     # ylab("Latitude") + -->
-<!--     # ggtitle(paste("Estimated climate anomaly for time", 250 * (t-1), "to",  250 * (t))) + -->
-<!--     # theme_bw() +  -->
-<!--     #   theme(legend.position = "bottom") -->
-<!--   multiplot(g_truth, g_estimate, cols=2) -->
-<!--   # multiplot(g_truth, g_estimate, g_anomaly_truth, g_anomaly_estimate, cols=2) -->
-<!-- } -->
-<!-- ``` -->
-
-
-<!-- ## Simulated Reconstruction Temporal Trend -->
+```{r, echo=FALSE}
+load("~/Google Drive/spatial-pollen/fit/sim-kriging-elevation.RData")
+load("~/Google Drive/spatial-pollen/climate-sim-nimble.RData")
+N <- sqrt(nrow(Z_pred_full))
+tt <- dim(Z_pred_full)[2]
+```
 
 
 
-<!-- <!-- ```{r, echo=FALSE, out.width='95%', message=FALSE, warning=FALSE} --> -->
-<!-- <!-- dat <- data.frame(  --> -->
-<!-- <!--   climate    = apply(climate, 2, mean),  --> -->
-<!-- <!--   year       = 1:(tt+1)*250, --> -->
-<!-- <!--   estimate   = c(NA, apply(Z_post, 3, mean)), --> -->
-<!-- <!--   lower_50   = c(NA, apply(apply(Z_post, c(1, 3), mean), 2, --> -->
-<!-- <!--                            quantile, prob = 0.25)), --> -->
-<!-- <!--   upper_50   = c(NA, apply(apply(Z_post, c(1, 3), mean), 2, --> -->
-<!-- <!--                            quantile, prob = 0.75)), --> -->
-<!-- <!--   lower_95   = c(NA, apply(apply(Z_post, c(1, 3), mean), 2, --> -->
-<!-- <!--                            quantile, prob = 0.025)), --> -->
-<!-- <!--   upper_95   = c(NA, apply(apply(Z_post, c(1, 3), mean), 2, --> -->
-<!-- <!--                            quantile, prob = 0.999975))) --> -->
-
-<!-- <!-- ggplot(data = dat, aes(x = year, y = climate)) + --> -->
-<!-- <!--    geom_line() +  --> -->
-<!-- <!--   geom_line(aes(x = year, y = estimate), color = "red") + --> -->
-<!-- <!--   geom_ribbon(aes(ymin = lower_50, ymax = upper_50), alpha = 0.5, fill="red") + --> -->
-<!-- <!--   geom_ribbon(aes(ymin = lower_95, ymax = upper_95), alpha = 0.25, fill="red") + --> -->
-<!-- <!--   ggtitle("Climate Trend in simulated degrees C") + --> -->
-<!-- <!--   ylab("simulated degrees C") + --> -->
-<!-- <!--   xlab("years in the past") + --> -->
-<!-- <!--   theme_bw() + --> -->
-<!-- <!--   theme(legend.position = "none", --> -->
-<!-- <!--         title = element_text(size=40),  --> -->
-<!-- <!--         axis.title = element_text(size=26),  --> -->
-<!-- <!--         axis.text = element_text(size=20))  --> -->
-<!-- <!-- ``` --> -->
+```{r sim-animation, fig.show='animate', cache=TRUE, echo=FALSE, interval=0.5}
+dat_pred <- data.frame(
+  estimate         = c(Z_pred_full),
+  truth            = c(climate[, 2:(tt+1)]),
+  anomaly          = c(climate[, 2:(tt+1)] - climate[, 1]),
+  anomaly_estimate = c(Z_pred_full - climate[, 1]),
+  lat              = locs[, 1],
+  long             = locs[, 2],
+  year             = factor(rep(2:(tt+1), each=nrow(climate))))
+zlims <- range(range(dat_pred$estimate), range(dat_pred$truth))
+alims <- range(range(dat_pred$anomaly), range(dat_pred$anomaly_estimate))
 
 
-<!-- ```{r, echo=FALSE, out.width='95%', message=FALSE, warning=FALSE} -->
-<!-- dat <- data.frame(  -->
-<!--   climate    = apply(climate, 2, mean),  -->
-<!--   year       = 1:(tt+1)*250, -->
-<!--   estimate   = c(NA, apply(Z_post_mean, 2, mean)), -->
-<!--   lower_50   = c(NA, apply(Z_post_mean, 2, mean) - -->
-<!--     0.674 * apply(Z_post_mean, 2, sd) / sqrt(nrow(Z_post_mean))), -->
-<!--   upper_50   = c(NA, apply(Z_post_mean, 2, mean) +  -->
-<!--     0.674 * apply(Z_post_mean, 2, sd) / sqrt(nrow(Z_post_mean))), -->
-<!--   lower_95   = c(NA, apply(Z_post_mean, 2, mean) - -->
-<!--     2 * apply(Z_post_mean, 2, sd) / sqrt(nrow(Z_post_mean))), -->
-<!--   upper_95   = c(NA, apply(Z_post_mean, 2, mean) +  -->
-<!--     2 * apply(Z_post_mean, 2, sd) / sqrt(nrow(Z_post_mean)))) -->
+for (t in 2:(tt+1)) {
+  g_truth <- ggplot(data = subset(dat_pred, year==t),
+                      aes(x = long, y = lat, fill = truth)) +
+    geom_tile() +
+    # geom_point(data = dat_fossil_climate, aes(x = long, y = lat, fill=X, color=X),
+    #            size=0.25, alpha=1.0, inherit.aes=FALSE) +
+    scale_fill_gradient2(low = "blue", mid="white", midpoint = sum(zlims)/2,
+                         high = "red", limits=zlims) +
+        # scale_color_brewer(palette = "RdYlBu") +
+    xlab("Longitude") +
+    ylab("Latitude") +
+    ggtitle(paste("Simulated climate for time", 250 * (t-1), "to",  250 * (t))) +
+    theme_bw() +
+      theme(legend.position = "bottom")
 
-<!-- ggplot(data = dat, aes(x = year, y = climate)) + -->
-<!--    geom_line() +  -->
-<!--   geom_line(aes(x = year, y = estimate), color = "red") + -->
-<!--   geom_ribbon(aes(ymin = lower_50, ymax = upper_50), alpha = 0.5, fill="red") + -->
-<!--   geom_ribbon(aes(ymin = lower_95, ymax = upper_95), alpha = 0.25, fill="red") + -->
-<!--   ggtitle("Climate Trend in simulated degrees C") + -->
-<!--   ylab("simulated degrees C") + -->
-<!--   xlab("years in the past") + -->
-<!--   theme_bw() + -->
-<!--   theme(legend.position = "none", -->
-<!--         title = element_text(size=40),  -->
-<!--         axis.title = element_text(size=26),  -->
-<!--         axis.text = element_text(size=20))  -->
-<!-- ``` -->
+  g_estimate <- ggplot(data = subset(dat_pred, year==t),
+                      aes(x = long, y = lat, fill = estimate)) +
+    geom_tile() +
+    # geom_point(data = dat_fossil_climate, aes(x = long, y = lat, fill=X, color=X),
+    #            size=0.25, alpha=1.0, inherit.aes=FALSE) +
+    scale_fill_gradient2(low = "blue", mid="white", midpoint = sum(zlims)/2,
+                         high = "red", limits=zlims) +
+        # scale_color_brewer(palette = "RdYlBu") +
+    xlab("Longitude") +
+    ylab("Latitude") +
+    ggtitle(paste("Estimated climate for time", 250 * (t-1), "to",  250 * (t))) +
+    theme_bw() +
+      theme(legend.position = "bottom")
+
+    # g_anomaly_truth <- ggplot(data = subset(dat_pred, year==t),
+    #                   aes(x = long, y = lat, fill = anomaly)) +
+    # geom_tile() +
+    # # geom_point(data = dat_fossil_climate, aes(x = long, y = lat, fill=X, color=X),
+    # #            size=0.25, alpha=1.0, inherit.aes=FALSE) +
+    # scale_fill_gradient2(low = "blue", mid="white", midpoint = sum(alims)/2,
+    #                      high = "red", limits = alims) +
+    #     # scale_color_brewer(palette = "RdYlBu") +
+    # xlab("Longitude") +
+    # ylab("Latitude") +
+    # ggtitle(paste("Simulated climate anomaly for time", 250 * (t-1), "to",  250 * (t))) +
+    # theme_bw() +
+    #   theme(legend.position = "bottom")
+    #
+    #     g_anomaly_estimate <- ggplot(data = subset(dat_pred, year==t),
+    #                   aes(x = long, y = lat, fill = anomaly_estimate)) +
+    # geom_tile() +
+    # # geom_point(data = dat_fossil_climate, aes(x = long, y = lat, fill=X, color=X),
+    # #            size=0.25, alpha=1.0, inherit.aes=FALSE) +
+    # scale_fill_gradient2(low = "blue", mid="white", midpoint = sum(alims)/2,
+    #                      high = "red", limits = alims) +
+    #     # scale_color_brewer(palette = "RdYlBu") +
+    # xlab("Longitude") +
+    # ylab("Latitude") +
+    # ggtitle(paste("Estimated climate anomaly for time", 250 * (t-1), "to",  250 * (t))) +
+    # theme_bw() +
+    #   theme(legend.position = "bottom")
+  multiplot(g_truth, g_estimate, cols=2)
+  # multiplot(g_truth, g_estimate, g_anomaly_truth, g_anomaly_estimate, cols=2)
+}
+```
 
 
-
-<!-- ## Reconstruction -->
-
-
-<!-- ```{r, eval=TRUE} -->
-<!-- load("~/Google Drive/spatial-pollen/fit/fossil-prediction-elevation-nimble.RData") -->
-<!-- load("~/Google Drive/spatial-pollen/fit/elevation-grid.RData") -->
-<!-- N <- sqrt(nrow(Z_pred_full)) -->
-<!-- tt <- ncol(Z_pred_full) -->
-<!-- n_grid <- nrow(pred.grid) -->
-<!-- ``` -->
-
-
-
-<!-- ```{r} -->
-<!-- Z_mean_full_mat <- Z_pred_full -->
-<!-- for (t in 1:tt) { -->
-<!--   Z_mean_full_mat[, t] <- Z_mean_full -->
-<!-- } -->
-<!-- dat_pred <- data.frame( -->
-<!--   climate = c(Z_pred_full), -->
-<!--   # climate = c(X_mean_full), -->
-<!--   anomaly = c(Z_pred_full - Z_mean_full_mat) / sd(c(Z_pred_full - Z_mean_full_mat)), -->
-<!--   long    = rep(pred.grid[, 1], times=tt), -->
-<!--   lat     = rep(pred.grid[, 2], times=tt), -->
-<!--   year    = rep(1:tt, each=n_grid) -->
-<!-- ) -->
-<!-- world <- map_data("world") # we already did this, but we can do it again -->
-<!-- world <- subset(world, region %in% c("Italy", "Switzerland", "France")) -->
-<!-- ``` -->
+## Simulated Reconstruction Temporal Trend
 
 
 
-<!-- ```{r reconstruction, fig.show='animate', cache=TRUE, message=FALSE, warning=FALSE, interval = 0.5} -->
-<!-- zlims <- range(dat_pred$climate) -->
-<!-- alims <- range(dat_pred$anomaly)  -->
-<!-- for (t in 1:tt) { -->
-<!--   g_climate <- ggplot(data = subset(dat_pred, year==t), -->
-<!--                       aes(x = long, y = lat, fill = climate)) + -->
-<!--     geom_tile() + -->
-<!--     # geom_point(data = dat_fossil_climate, aes(x = long, y = lat, fill=X, color=X), -->
-<!--     #            size=0.25, alpha=1.0, inherit.aes=FALSE) + -->
-<!--     # scale_fill_continuous(low = "blue", high = "red", limits=zlims) + -->
-<!--     scale_fill_gradient2(low = "blue", mid="white", midpoint = sum(zlims)/2,  -->
-<!--                          high = "red", limits=zlims) + -->
-<!--         # scale_color_brewer(palette = "RdYlBu") + -->
-<!--     geom_path(data = world, aes(x = long, y = lat, group = group), -->
-<!--                  inherit.aes = FALSE, -->
-<!--                  color = "black") + -->
-<!--     coord_fixed(1.3) + -->
-<!--     xlim(4.5, 9.5) +  -->
-<!--     ylim(43.5, 47.5) +  -->
-<!--     xlab("Longitude") + -->
-<!--     ylab("Latitude") + -->
-<!--     ggtitle(paste("Estimated climate for", 250 * (t-1), "to",  250 * t)) + -->
-<!--     theme_bw() -->
-<!--   g_anomaly <- ggplot(data = subset(dat_pred, year==t), -->
-<!--                       aes(x = long, y = lat, fill = anomaly)) + -->
-<!--     geom_tile() + -->
-<!--     # geom_point(data = dat_fossil_climate, aes(x = long, y = lat, fill=X, color=X), -->
-<!--     #            size=0.25, alpha=1.0, inherit.aes=FALSE) + -->
-<!--     # scale_fill_continuous(low = "blue", high = "red", limits=alims) + -->
-<!--     scale_fill_gradient2(low = "blue", mid = "white", midpoint = 0,  -->
-<!--                          high = "red", limits = alims) + -->
-<!--     # scale_color_continuous(pallette = "RdYlBu") +  -->
-<!--     geom_path(data = world, aes(x = long, y = lat, group = group), -->
-<!--                  inherit.aes = FALSE, -->
-<!--                  color = "black") + -->
-<!--     coord_fixed(1.3) + -->
-<!--     xlim(4.5, 9.5) +  -->
-<!--     ylim(43.5, 47.5) +  -->
-<!--     xlab("Longitude") + -->
-<!--     ylab("Latitude") + -->
-<!--     ggtitle(paste("Estimated anomaly for", 250 * (t-1), "to",  250 * t)) + -->
-<!--     theme_bw() -->
-<!--   multiplot(g_climate, g_anomaly, cols=2) -->
-<!--   # print(multiplot(g_climate, g_anomaly, cols=2)) -->
-<!-- } -->
-<!-- ``` -->
 
-<!-- ## Reconstruction over time -->
+```{r, echo=FALSE, out.width='95%', message=FALSE, warning=FALSE}
+dat <- data.frame(
+  climate    = apply(climate, 2, mean),
+  year       = 1:(tt+1)*250,
+  estimate   = c(NA, apply(Z_post_mean, 2, mean)),
+  lower_50   = c(NA, apply(Z_post_mean, 2, mean) -
+    0.674 * apply(Z_post_mean, 2, sd) / sqrt(nrow(Z_post_mean))),
+  upper_50   = c(NA, apply(Z_post_mean, 2, mean) +
+    0.674 * apply(Z_post_mean, 2, sd) / sqrt(nrow(Z_post_mean))),
+  lower_95   = c(NA, apply(Z_post_mean, 2, mean) -
+    2 * apply(Z_post_mean, 2, sd) / sqrt(nrow(Z_post_mean))),
+  upper_95   = c(NA, apply(Z_post_mean, 2, mean) +
+    2 * apply(Z_post_mean, 2, sd) / sqrt(nrow(Z_post_mean))))
 
-<!-- ```{r, message=FALSE, warning=FALSE} -->
-<!-- Z_post_mean <- apply(Z_post, c(2, 3), mean) -->
-<!-- Z_post_lower_50 <- apply(apply(Z_post, c(1, 3), mean), 2, quantile, prob=0.25) -->
-<!-- Z_post_upper_50 <- apply(apply(Z_post, c(1, 3), mean), 2, quantile, prob=0.75) -->
-<!-- Z_post_lower_95 <- apply(apply(Z_post, c(1, 3), mean), 2, quantile, prob=0.025) -->
-<!-- Z_post_upper_95 <- apply(apply(Z_post, c(1, 3), mean), 2, quantile, prob=0.975) -->
-
-<!-- # dat <- data.frame( -->
-<!-- #   Z        = c(apply(cbind(c(data$Z0 * sd_X + mu_X), Z_post_mean), 2, mean)), -->
-<!-- #   lower_50 = c(NA, Z_post_lower_50), -->
-<!-- #   upper_50 = c(NA, Z_post_upper_50), -->
-<!-- #   lower_95 = c(NA, Z_post_lower_95), -->
-<!-- #   upper_95 = c(NA, Z_post_upper_95), -->
-<!-- #   year     = 0:tt*250) -->
-
-<!-- dat <- data.frame( -->
-<!--   year       = (0:tt)*250, -->
-<!--   Z          = c(mean(data$Z0 * sd_X + mu_X), apply(Z_post_mean, 2, mean)), -->
-<!--   # Z          = c(mean((data$Z0 - data$Wgamma) * sd_X + mu_X), apply(Z_post_mean, 2, mean)), -->
-<!--   lower_50   = c(NA, apply(Z_post_mean, 2, mean) - -->
-<!--     0.674 * apply(Z_post_mean, 2, sd) / sqrt(nrow(Z_post_mean))), -->
-<!--   upper_50   = c(NA, apply(Z_post_mean, 2, mean) + -->
-<!--     0.674 * apply(Z_post_mean, 2, sd) / sqrt(nrow(Z_post_mean))), -->
-<!--   lower_95   = c(NA, apply(Z_post_mean, 2, mean) - -->
-<!--     2 * apply(Z_post_mean, 2, sd) / sqrt(nrow(Z_post_mean))), -->
-<!--   upper_95   = c(NA, apply(Z_post_mean, 2, mean) + -->
-<!--     2 * apply(Z_post_mean, 2, sd) / sqrt(nrow(Z_post_mean)))) -->
-
-<!-- ggplot(data = dat, aes(x=year, y=Z)) +  -->
-<!--   geom_point(data = subset(dat, year == 0),  aes(x=year, y=Z), size=4) +  -->
-<!--   geom_line(data = subset(dat, year > 0),  aes(x=year, y=Z), color = "red") +  -->
-<!--   geom_ribbon(aes(ymin = lower_50, ymax = upper_50, fill = "red"), alpha = 0.5) + -->
-<!--   geom_ribbon(aes(ymin = lower_95, ymax = upper_95, fill = "red"), alpha = 0.25) + -->
-<!--   ggtitle("Climate Trend in degrees C") + -->
-<!--   ylab("degrees C") + -->
-<!--   xlab("years in the past") + -->
-<!--   theme_bw() + -->
-<!--   theme(legend.position = "none", -->
-<!--         title = element_text(size=40),  -->
-<!--         axis.title = element_text(size=26),  -->
-<!--         axis.text = element_text(size=20))  -->
-<!-- ``` -->
+ggplot(data = dat, aes(x = year, y = climate)) +
+   geom_line() +
+  geom_line(aes(x = year, y = estimate), color = "red") +
+  geom_ribbon(aes(ymin = lower_50, ymax = upper_50), alpha = 0.5, fill="red") +
+  geom_ribbon(aes(ymin = lower_95, ymax = upper_95), alpha = 0.25, fill="red") +
+  ggtitle("Climate Trend in simulated degrees C") +
+  ylab("simulated degrees C") +
+  xlab("years in the past") +
+  theme_bw() +
+  theme(legend.position = "none",
+        title = element_text(size=40),
+        axis.title = element_text(size=26),
+        axis.text = element_text(size=20))
+```
 
 
-<!-- ## Reconstruction Inference -->
+# Reconstruction
+## Reconstruction
 
-<!-- * Current methods are site-level "transfer function" methods. -->
-<!--     * These methods ignore elevation, temporal autocorrelation, and spatial autocorrelation. -->
-<!--     * Sensitive to the data.  -->
-<!--     * Poor quantification of uncertainty. -->
-<!--     * Unclear how to choose among models. -->
 
-<!-- * The spatial method is statistically principled. -->
-<!--     * Has higher power. -->
-<!--     * Smaller uncertainties that change with data (sample size, signal coherence, etc.).  -->
-<!--     * Can use model selection methods (information criterion, etc). -->
+```{r, eval=TRUE}
+load("~/Google Drive/spatial-pollen/fit/fossil-prediction-elevation-nimble.RData")
+load("~/Google Drive/spatial-pollen/fit/elevation-grid.RData")
+N <- sqrt(nrow(Z_pred_full))
+tt <- ncol(Z_pred_full)
+n_grid <- nrow(pred.grid)
+```
+
+
+
+```{r}
+Z_mean_full_mat <- Z_pred_full
+for (t in 1:tt) {
+  Z_mean_full_mat[, t] <- Z_mean_full
+}
+dat_pred <- data.frame(
+  climate = c(Z_pred_full),
+  # climate = c(X_mean_full),
+  anomaly = c(Z_pred_full - Z_mean_full_mat) / sd(c(Z_pred_full - Z_mean_full_mat)),
+  long    = rep(pred.grid[, 1], times=tt),
+  lat     = rep(pred.grid[, 2], times=tt),
+  year    = rep(1:tt, each=n_grid)
+)
+world <- map_data("world") # we already did this, but we can do it again
+world <- subset(world, region %in% c("Italy", "Switzerland", "France"))
+```
+
+
+
+```{r reconstruction, fig.show='animate', cache=TRUE, message=FALSE, warning=FALSE, interval = 0.5}
+zlims <- range(dat_pred$climate)
+alims <- range(dat_pred$anomaly)
+for (t in 1:tt) {
+  g_climate <- ggplot(data = subset(dat_pred, year==t),
+                      aes(x = long, y = lat, fill = climate)) +
+    geom_tile() +
+    # geom_point(data = dat_fossil_climate, aes(x = long, y = lat, fill=X, color=X),
+    #            size=0.25, alpha=1.0, inherit.aes=FALSE) +
+    # scale_fill_continuous(low = "blue", high = "red", limits=zlims) +
+    scale_fill_gradient2(low = "blue", mid="white", midpoint = sum(zlims)/2,
+                         high = "red", limits=zlims) +
+        # scale_color_brewer(palette = "RdYlBu") +
+    geom_path(data = world, aes(x = long, y = lat, group = group),
+                 inherit.aes = FALSE,
+                 color = "black") +
+    coord_fixed(1.3) +
+    xlim(4.5, 9.5) +
+    ylim(43.5, 47.5) +
+    xlab("Longitude") +
+    ylab("Latitude") +
+    ggtitle(paste("Estimated climate for", 250 * (t-1), "to",  250 * t)) +
+    theme_bw()
+  g_anomaly <- ggplot(data = subset(dat_pred, year==t),
+                      aes(x = long, y = lat, fill = anomaly)) +
+    geom_tile() +
+    # geom_point(data = dat_fossil_climate, aes(x = long, y = lat, fill=X, color=X),
+    #            size=0.25, alpha=1.0, inherit.aes=FALSE) +
+    # scale_fill_continuous(low = "blue", high = "red", limits=alims) +
+    scale_fill_gradient2(low = "blue", mid = "white", midpoint = 0,
+                         high = "red", limits = alims) +
+    # scale_color_continuous(pallette = "RdYlBu") +
+    geom_path(data = world, aes(x = long, y = lat, group = group),
+                 inherit.aes = FALSE,
+                 color = "black") +
+    coord_fixed(1.3) +
+    xlim(4.5, 9.5) +
+    ylim(43.5, 47.5) +
+    xlab("Longitude") +
+    ylab("Latitude") +
+    ggtitle(paste("Estimated anomaly for", 250 * (t-1), "to",  250 * t)) +
+    theme_bw()
+  multiplot(g_climate, g_anomaly, cols=2)
+  # print(multiplot(g_climate, g_anomaly, cols=2))
+}
+```
+
+## Reconstruction over time
+
+```{r, message=FALSE, warning=FALSE}
+Z_post_mean <- apply(Z_post, c(2, 3), mean)
+Z_post_lower_50 <- apply(apply(Z_post, c(1, 3), mean), 2, quantile, prob=0.25)
+Z_post_upper_50 <- apply(apply(Z_post, c(1, 3), mean), 2, quantile, prob=0.75)
+Z_post_lower_95 <- apply(apply(Z_post, c(1, 3), mean), 2, quantile, prob=0.025)
+Z_post_upper_95 <- apply(apply(Z_post, c(1, 3), mean), 2, quantile, prob=0.975)
+
+# dat <- data.frame(
+#   Z        = c(apply(cbind(c(data$Z0 * sd_X + mu_X), Z_post_mean), 2, mean)),
+#   lower_50 = c(NA, Z_post_lower_50),
+#   upper_50 = c(NA, Z_post_upper_50),
+#   lower_95 = c(NA, Z_post_lower_95),
+#   upper_95 = c(NA, Z_post_upper_95),
+#   year     = 0:tt*250)
+
+dat <- data.frame(
+  year       = (0:tt)*250,
+  Z          = c(mean(data$Z0 * sd_X + mu_X), apply(Z_post_mean, 2, mean)),
+  # Z          = c(mean((data$Z0 - data$Wgamma) * sd_X + mu_X), apply(Z_post_mean, 2, mean)),
+  lower_50   = c(NA, apply(Z_post_mean, 2, mean) -
+    0.674 * apply(Z_post_mean, 2, sd) / sqrt(nrow(Z_post_mean))),
+  upper_50   = c(NA, apply(Z_post_mean, 2, mean) +
+    0.674 * apply(Z_post_mean, 2, sd) / sqrt(nrow(Z_post_mean))),
+  lower_95   = c(NA, apply(Z_post_mean, 2, mean) -
+    2 * apply(Z_post_mean, 2, sd) / sqrt(nrow(Z_post_mean))),
+  upper_95   = c(NA, apply(Z_post_mean, 2, mean) +
+    2 * apply(Z_post_mean, 2, sd) / sqrt(nrow(Z_post_mean))))
+
+ggplot(data = dat, aes(x=year, y=Z)) +
+  geom_point(data = subset(dat, year == 0),  aes(x=year, y=Z), size=4) +
+  geom_line(data = subset(dat, year > 0),  aes(x=year, y=Z), color = "red") +
+  geom_ribbon(aes(ymin = lower_50, ymax = upper_50, fill = "red"), alpha = 0.5) +
+  geom_ribbon(aes(ymin = lower_95, ymax = upper_95, fill = "red"), alpha = 0.25) +
+  ggtitle("Climate Trend in degrees C") +
+  ylab("degrees C") +
+  xlab("years in the past") +
+  theme_bw() +
+  theme(legend.position = "none",
+        title = element_text(size=40),
+        axis.title = element_text(size=26),
+        axis.text = element_text(size=20))
+```
+
+
+## Reconstruction Inference
+
+* Current methods are site-level "transfer function" methods.
+    * These methods ignore elevation, temporal autocorrelation, and spatial autocorrelation.
+    * Sensitive to the data.
+    * Poor quantification of uncertainty.
+    * Unclear how to choose among models.
+
+* The spatial method is statistically principled.
+    * Has higher power.
+    * Smaller uncertainties that change with data (sample size, signal coherence, etc.).
+    * Can use model selection methods (information criterion, etc).
 
 <!-- ## Competing Methods | Weighted averaging -->
 
@@ -2031,7 +2506,7 @@ $$
 
 <!-- $\begin{align*} -->
 <!-- \hat{z} = \frac{\sum_{j=1}^d y_{j} \hat{\mu}_j} {\sum_{i=1}^n y_{ij}} -->
-<!-- \end{align*}$     -->
+<!-- \end{align*}$ -->
 
 <!-- ## Competing Methods : Weighted averaging -->
 
@@ -2064,8 +2539,8 @@ $$
 <!-- } -->
 
 <!-- dat <- data.frame( -->
-<!--   z        = z,  -->
-<!--   z_hat    = z_hat)  -->
+<!--   z        = z, -->
+<!--   z_hat    = z_hat) -->
 
 <!-- lims = range(c(z, z_hat)) -->
 
@@ -2075,13 +2550,13 @@ $$
 <!--   theme(legend.position = "none") + -->
 <!--   xlim(lims) + ylim(lims) + -->
 <!--   ylab("Predicted") + -->
-<!--   xlab("Observed") +  -->
+<!--   xlab("Observed") + -->
 <!--   ggtitle("Weighted Averaging") + -->
 <!--   theme_bw() + -->
 <!--   theme(legend.position = "none", -->
-<!--         title = element_text(size=40),  -->
-<!--         axis.title = element_text(size=26),  -->
-<!--         axis.text = element_text(size=20))  -->
+<!--         title = element_text(size=40), -->
+<!--         axis.title = element_text(size=26), -->
+<!--         axis.text = element_text(size=20)) -->
 <!-- ``` -->
 
 
@@ -2093,8 +2568,8 @@ $$
 
 <!-- ```{r, echo=FALSE, message=FALSE, out.width='65%'} -->
 <!-- dat <- data.frame( -->
-<!--   z        = z,  -->
-<!--   z_hat    = z_hat)  -->
+<!--   z        = z, -->
+<!--   z_hat    = z_hat) -->
 
 <!-- lims = range(c(z, z_hat)) -->
 
@@ -2104,20 +2579,20 @@ $$
 <!--   theme(legend.position = "none") + -->
 <!--   xlim(lims) + ylim(lims) + -->
 <!--   ylab("Predicted") + -->
-<!--   xlab("Observed") +  -->
+<!--   xlab("Observed") + -->
 <!--   ggtitle("Weighted Averaging") + -->
 <!--   theme_bw() + -->
 <!--   theme(legend.position = "none", -->
-<!--         title = element_text(size=40),  -->
-<!--         axis.title = element_text(size=26),  -->
+<!--         title = element_text(size=40), -->
+<!--         axis.title = element_text(size=26), -->
 <!--         axis.text = element_text(size=20)) + -->
 <!--   geom_smooth(method = "lm") -->
 
 <!-- z_boosted <- coef(lm(z ~ z_hat))[1] +  coef(lm(z ~ z_hat))[2] * z_hat -->
 <!-- dat <- data.frame( -->
-<!--   z         = z,  -->
-<!--   z_hat     = z_hat,  -->
-<!--   z_boosted = z_boosted)  -->
+<!--   z         = z, -->
+<!--   z_hat     = z_hat, -->
+<!--   z_boosted = z_boosted) -->
 
 <!-- lims = range(c(z, z_boosted)) -->
 
@@ -2127,12 +2602,12 @@ $$
 <!--   theme(legend.position = "none") + -->
 <!--   xlim(lims) + ylim(lims) + -->
 <!--   ylab("Boosted Prediction") + -->
-<!--   xlab("Observed") +  -->
+<!--   xlab("Observed") + -->
 <!--   ggtitle("Weighted Averaging") + -->
 <!--   theme_bw() + -->
 <!--   theme(legend.position = "none", -->
-<!--         title = element_text(size=40),  -->
-<!--         axis.title = element_text(size=26),  -->
+<!--         title = element_text(size=40), -->
+<!--         axis.title = element_text(size=26), -->
 <!--         axis.text = element_text(size=20)) + -->
 <!--   geom_abline(color="red") -->
 <!-- multiplot(p1, p2, cols=2) -->
@@ -2153,36 +2628,36 @@ $$
 
 
 
-<!-- ## Reconstruction Inference -->
+## Reconstruction Inference
 
-<!-- ```{r, out.width='100%'} -->
-<!-- # knitr::include_graphics(here("images", "Science.png")) -->
-<!-- knitr::include_graphics("./images/site-level-inference-reduced.png") -->
-<!-- ``` -->
+```{r, out.width='100%'}
+# knitr::include_graphics(here("images", "Science.png"))
+knitr::include_graphics("./images/site-level-inference-reduced.png")
+```
 
-<!-- ## Reconstruction Inference -->
+## Reconstruction Inference
 
-<!-- ```{r, out.width='100%'} -->
-<!-- # knitr::include_graphics(here("images", "Science.png")) -->
-<!-- knitr::include_graphics("./images/site-level-inference.png") -->
-<!-- ``` -->
+```{r, out.width='100%'}
+# knitr::include_graphics(here("images", "Science.png"))
+knitr::include_graphics("./images/site-level-inference.png")
+```
 
-<!-- # Conclusion -->
+# Conclusion
 
-<!-- ## Conclusion -->
+## Conclusion
 
 
-<!-- **Model framework opens the door to answering meaningful questions:** -->
+**Model framework opens the door to answering meaningful questions:**
 
-<!-- * Do pollen distributions change with elevation? -->
-<!--     * Covariate-sensitive parameterizations. -->
+* Do pollen distributions change with elevation?
+    * Covariate-sensitive parameterizations.
 
-<!-- * Do pollen distributions change over space or time? -->
-<!--     * Regression coefficients vary over space/time. -->
+* Do pollen distributions change over space or time?
+    * Regression coefficients vary over space/time.
 
-<!-- * How to combine multiple proxies (tree rings, pollen, etc)? -->
-<!--     * Each proxy gets its own data model. -->
-<!--     * Proxies link to dynamic space-time process.  -->
+* How to combine multiple proxies (tree rings, pollen, etc)?
+    * Each proxy gets its own data model.
+    * Proxies link to dynamic space-time process.
 
 
 <!-- ## Thanks for the attention -->
@@ -2190,57 +2665,77 @@ $$
 <!-- \color{blue} jrtipton@uark.edu -->
 
 
-<!-- <!-- ```{r fit-animation, fig.show='animate', cache=TRUE, interval=0.5} --> -->
-<!-- <!-- lims <- range(c(climate, X_pred_full_obs)) --> -->
+<!-- ```{r fit-animation, fig.show='animate', cache=TRUE, interval=0.5} -->
+<!-- lims <- range(c(climate, Z_pred_full)) -->
 
-<!-- <!-- for (t in 1:149) { --> -->
-<!-- <!--   layout(matrix(1:2, 1, 2)) --> -->
-<!-- <!--   image.plot(matrix(climate[, t+1], N, N),  --> -->
-<!-- <!--              main=paste("Truth for Period", t + 1), --> -->
-<!-- <!--              zlim=lims)  --> -->
-<!-- <!--   image.plot(matrix(X_pred_full_obs[, t], N, N),  --> -->
-<!-- <!--              main=paste("Estimate for Period", t + 1), --> -->
-<!-- <!--              zlim=lims) --> -->
-<!-- <!-- } --> -->
-<!-- <!-- ``` --> -->
-
-
-<!-- <!-- ```{r, message=FALSE, echo=FALSE, cache=TRUE, out.width='85%'} --> -->
-<!-- <!-- N <- 500 --> -->
-<!-- <!-- d <- 8 --> -->
-<!-- <!-- dat <- sim_compositional_data(N=N,  --> -->
-<!-- <!--                               likelihood = "multi-logit", --> -->
-<!-- <!--                               additive_correlation = TRUE) --> -->
-<!-- <!-- y_dens <- matrix(0, N, d) --> -->
-<!-- <!-- p_alpha <- matrix(0, N, d) --> -->
-<!-- <!-- for (i in 1:N) { --> -->
-<!-- <!--   y_dens[i, ] <- dat$y[i, ] / sum(dat$y[i, ]) --> -->
-<!-- <!--   p_alpha[i, ] <- exp(dat$mu + dat$zeta[i, ]) / sum(exp(dat$mu + dat$zeta[i, ])) --> -->
-<!-- <!-- } --> -->
-
-<!-- <!-- simPlotData <- data.frame(species     = as.factor(rep(paste("species", 1:d), each=N)), --> -->
-<!-- <!--                           count       = c(y_dens), --> -->
-<!-- <!--                           covariate   = rep(dat$X, times=d), alpha=c(p_alpha)) --> -->
-
-<!-- <!-- gsim1 <- ggplot(simPlotData, aes(x=covariate, y=count, color=species, group=species)) + --> -->
-<!-- <!--   geom_point(alpha=0.25) +  --> -->
-<!-- <!--   theme(legend.position="none",  --> -->
-<!-- <!--         title = element_text(size=8)) + --> -->
-<!-- <!--   ggtitle("Simulated response vs. covariate") + --> -->
-<!-- <!--   geom_line(aes(x=covariate, y=alpha, col = species), simPlotData, lwd=1.25) --> -->
-
-<!-- <!-- gsim2 <- ggplot(simPlotData, aes(x=covariate, y=count, color=species, group=species)) + --> -->
-<!-- <!--   geom_point(alpha=0.25) +  --> -->
-<!-- <!--   theme(legend.position="none", --> -->
-<!-- <!--         title = element_text(size=8)) + --> -->
-<!-- <!--   ggtitle("Simulated response vs. covariate by species") + --> -->
-<!-- <!--   geom_line(aes(x=covariate, y=alpha, col = species), simPlotData, lwd=1.25) + --> -->
-<!-- <!--   facet_wrap( ~ species, ncol = 2) --> -->
-<!-- <!-- multiplot(gsim1, gsim2, cols=2) --> -->
-<!-- <!-- ``` --> -->
-
-<!-- ## Trend Comparison -->
-
-<!-- [pages2k](http://science.sciencemag.org/content/339/6124/1198) -->
+<!-- for (t in 1:149) { -->
+<!--   layout(matrix(1:2, 1, 2)) -->
+<!--   image.plot(matrix(climate[, t+1], N, N), -->
+<!--              main=paste("Truth for Period", t + 1), -->
+<!--              zlim=lims) -->
+<!--   image.plot(matrix(Z_pred_full[, t], N, N), -->
+<!--              main=paste("Estimate for Period", t + 1), -->
+<!--              zlim=lims) -->
+<!-- } -->
+<!-- ``` -->
 
 
+<!-- ```{r, message=FALSE, echo=FALSE, cache=TRUE, out.width='85%'} -->
+<!-- N <- 500 -->
+<!-- d <- 8 -->
+<!-- dat <- sim_compositional_data(N=N, -->
+<!--                               likelihood = "multi-logit", -->
+<!--                               additive_correlation = TRUE) -->
+<!-- y_dens <- matrix(0, N, d) -->
+<!-- p_alpha <- matrix(0, N, d) -->
+<!-- for (i in 1:N) { -->
+<!--   y_dens[i, ] <- dat$y[i, ] / sum(dat$y[i, ]) -->
+<!--   p_alpha[i, ] <- exp(dat$mu + dat$zeta[i, ]) / sum(exp(dat$mu + dat$zeta[i, ])) -->
+<!-- } -->
+
+<!-- simPlotData <- data.frame(species     = as.factor(rep(paste("species", 1:d), each=N)), -->
+<!--                           count       = c(y_dens), -->
+<!--                           covariate   = rep(dat$X, times=d), alpha=c(p_alpha)) -->
+
+<!-- gsim1 <- ggplot(simPlotData, aes(x=covariate, y=count, color=species, group=species)) + -->
+<!--   geom_point(alpha=0.25) + -->
+<!--   theme(legend.position="none", -->
+<!--         title = element_text(size=8)) + -->
+<!--   ggtitle("Simulated response vs. covariate") + -->
+<!--   geom_line(aes(x=covariate, y=alpha, col = species), simPlotData, lwd=1.25) -->
+
+<!-- gsim2 <- ggplot(simPlotData, aes(x=covariate, y=count, color=species, group=species)) + -->
+<!--   geom_point(alpha=0.25) + -->
+<!--   theme(legend.position="none", -->
+<!--         title = element_text(size=8)) + -->
+<!--   ggtitle("Simulated response vs. covariate by species") + -->
+<!--   geom_line(aes(x=covariate, y=alpha, col = species), simPlotData, lwd=1.25) + -->
+<!--   facet_wrap( ~ species, ncol = 2) -->
+<!-- multiplot(gsim1, gsim2, cols=2) -->
+<!-- ``` -->
+
+
+
+
+## Conclusion
+
+**It is possible to put the science in your statistics.**
+
+* Takes some careful thinking and learning.
+
+* Opens the door to more powerful analyses.
+
+* More flexibility in the questions that can be answered.
+
+<!-- ## Thanks for the attention -->
+
+<!-- \color{blue} jrtipton@uark.edu -->
+
+# Thank You
+
+<font size="+6">\color{blue}jrtipton@uark.edu</font>
+
+
+## Trend Comparison
+
+[pages2k](http://science.sciencemag.org/content/339/6124/1198)
