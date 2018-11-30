@@ -32,7 +32,7 @@ library(knitr)
 # library(BayesComposition)
 library(fields)
 library(animation)
-library(gganimate)
+# library(gganimate)
 library(gplots)
 source(here("functions", "multiplot.R"))
 knitr::opts_chunk$set(echo = FALSE, 
@@ -920,60 +920,60 @@ $$
 
 <!-- Add this in later -->
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE}
-library(gganimate)
-library(ggplot2)
-set.seed(501)
-theme_set(theme_bw())
-K <- 20
-iter <- 100
-cluster <- rep(0, iter)
+<!-- ```{r, echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE} -->
+<!-- # library(gganimate) -->
+<!-- library(ggplot2) -->
+<!-- set.seed(501) -->
+<!-- theme_set(theme_bw()) -->
+<!-- K <- 20 -->
+<!-- iter <- 100 -->
+<!-- cluster <- rep(0, iter) -->
 
-for (i in 1:iter) {
-  b <- rbeta(K, 1, 5)
-  p <- numeric(K)
-  p[1] <- b[1]
-  p[2:K] <- sapply(2:K, function(i) b[i] * prod(1 - b[1:(i-1)]))
-  cluster[i] <- sample(1:K, 1, prob=p)
-}
-cluster <- factor(cluster, levels=1:K)
-dat <- data.frame(
-  count = c(unlist(sapply(1:iter, function(i) tabulate(cluster[1:i], nbins=K)))),
-  cluster=rep(1:K, times=iter*K),
-  
-  iter=rep(factor(1:iter), each=K))
-p1 <- ggplot(dat, aes(x=cluster, y=count, frame=iter)) + geom_point() + 
-  ggtitle("Prior with many clusters, sediment grain = ") + 
-  xlab("Mineral Creation Events") + 
-  ylab("Number sediment grains")
-gganimate(p1, "~/Google Drive/Meetings/2018/intro-math-seminar/dp1.gif", interval=0.01)
+<!-- for (i in 1:iter) { -->
+<!--   b <- rbeta(K, 1, 5) -->
+<!--   p <- numeric(K) -->
+<!--   p[1] <- b[1] -->
+<!--   p[2:K] <- sapply(2:K, function(i) b[i] * prod(1 - b[1:(i-1)])) -->
+<!--   cluster[i] <- sample(1:K, 1, prob=p) -->
+<!-- } -->
+<!-- cluster <- factor(cluster, levels=1:K) -->
+<!-- dat <- data.frame( -->
+<!--   count = c(unlist(sapply(1:iter, function(i) tabulate(cluster[1:i], nbins=K)))), -->
+<!--   cluster=rep(1:K, times=iter*K), -->
 
-for (i in 1:iter) {
-  b <- rbeta(K, 1, 1/5)
-  p <- numeric(K)
-  p[1] <- b[1]
-  p[2:K] <- sapply(2:K, function(i) b[i] * prod(1 - b[1:(i-1)]))
-  cluster[i] <- sample(1:K, 1, prob=p)
-}
-cluster <- factor(cluster, levels=1:K)
-dat <- data.frame(
-  count = c(unlist(sapply(1:iter, function(i) tabulate(cluster[1:i], nbins=K)))),
-  cluster=rep(1:K, times=iter*K),
-  
-  iter=rep(factor(1:iter), each=K))
-p2 <- ggplot(dat, aes(x=cluster, y=count, frame=iter)) + geom_point() + 
-  ggtitle("Prior with few clusters, sediment grain = ") + 
-  xlab("Mineral Creation Events") + 
-  ylab("Number sediment grains")
-gganimate(p2, "~/Google Drive/Meetings/2018/intro-math-seminar/dp2.gif", interval=0.01)
-gganimate(p2, "~/Google Drive/Meetings/2018/intro-math-seminar/dp2.mp4", interval=0.01)
-```
+<!--   iter=rep(factor(1:iter), each=K)) -->
+<!-- p1 <- ggplot(dat, aes(x=cluster, y=count, frame=iter)) + geom_point() +  -->
+<!--   ggtitle("Prior with many clusters, sediment grain = ") +  -->
+<!--   xlab("Mineral Creation Events") +  -->
+<!--   ylab("Number sediment grains") -->
+<!-- gganimate(p1, "~/Google Drive/Meetings/2018/intro-math-seminar/dp1.gif", interval=0.01) -->
+
+<!-- for (i in 1:iter) { -->
+<!--   b <- rbeta(K, 1, 1/5) -->
+<!--   p <- numeric(K) -->
+<!--   p[1] <- b[1] -->
+<!--   p[2:K] <- sapply(2:K, function(i) b[i] * prod(1 - b[1:(i-1)])) -->
+<!--   cluster[i] <- sample(1:K, 1, prob=p) -->
+<!-- } -->
+<!-- cluster <- factor(cluster, levels=1:K) -->
+<!-- dat <- data.frame( -->
+<!--   count = c(unlist(sapply(1:iter, function(i) tabulate(cluster[1:i], nbins=K)))), -->
+<!--   cluster=rep(1:K, times=iter*K), -->
+
+<!--   iter=rep(factor(1:iter), each=K)) -->
+<!-- p2 <- ggplot(dat, aes(x=cluster, y=count, frame=iter)) + geom_point() +  -->
+<!--   ggtitle("Prior with few clusters, sediment grain = ") +  -->
+<!--   xlab("Mineral Creation Events") +  -->
+<!--   ylab("Number sediment grains") -->
+<!-- gganimate(p2, "~/Google Drive/Meetings/2018/intro-math-seminar/dp2.gif", interval=0.01) -->
+<!-- gganimate(p2, "~/Google Drive/Meetings/2018/intro-math-seminar/dp2.mp4", interval=0.01) -->
+<!-- ``` -->
 
 
 
 ```{r, cache=TRUE, fig.show="animate", fig.align = "center", interval=0.125}
-set.seed(501)
-theme_set(theme_bw())
+set.seed(501) 
+theme_set(theme_bw()) 
 K <- 20
 iter <- 100
 cluster <- rep(0, iter)
@@ -1034,9 +1034,9 @@ for (i in 1:100) {
 #           img.name = "clusters")
 ```
 
-\begin{center}
-\animategraphics[controls, width=0.95\textwidth]{10.0}{animations/clusters}{1}{100}
-\end{center}
+<!-- \begin{center} -->
+<!-- \animategraphics[controls, width=0.95\textwidth]{10.0}{animations/clusters}{1}{100} -->
+<!-- \end{center} -->
 
 
 ## Dirichlet Process 
@@ -1586,7 +1586,7 @@ $$
 ## Tree Ring Growth Model
 
 ```{r, cache=TRUE, fig.show="animate", fig.align = "center", interval=0.5}
-load('~/treeRing/datafiles/hudsonValleyData.RData')
+load('~/treeRing/datafiles/hudsonValleyData.RData')  
 dd_temp<-data.frame(year=Temp.avg.dat[, 1], month = Temp.avg.dat[, 2], temp=apply(Temp.avg.dat[, 3:36], 1, mean))
 dd_temp <- dd_temp[order(dd_temp$year, dd_temp$month), ]
 dd_precip<-data.frame(year=Precip.dat[, 1], month = Precip.dat[, 2], precip=apply(Precip.dat[, 3:36], 1, mean))
@@ -1696,8 +1696,8 @@ for(i in 1:36){
 ## The Inverse Problem
 
 ```{r, cache=TRUE, fig.show="animate", fig.align = "center", interval=0.5}
-set.seed(104)
-
+set.seed(104)  
+ 
 iter <- 20
 banana <- vector('list', length = iter)
 
@@ -2244,7 +2244,7 @@ tt <- dim(Z_pred_full)[2]
 
 
 ```{r sim-animation, fig.show='animate', cache=TRUE, echo=FALSE, interval=0.5}
-dat_pred <- data.frame(
+dat_pred <- data.frame(  
   estimate         = c(Z_pred_full),
   truth            = c(climate[, 2:(tt+1)]),
   anomaly          = c(climate[, 2:(tt+1)] - climate[, 1]),
@@ -2387,7 +2387,7 @@ world <- subset(world, region %in% c("Italy", "Switzerland", "France"))
 
 
 ```{r reconstruction, fig.show='animate', cache=TRUE, message=FALSE, warning=FALSE, interval = 0.5}
-zlims <- range(dat_pred$climate)
+zlims <- range(dat_pred$climate)  
 alims <- range(dat_pred$anomaly)
 for (t in 1:tt) {
   g_climate <- ggplot(data = subset(dat_pred, year==t),
@@ -2646,18 +2646,14 @@ knitr::include_graphics("./images/site-level-inference.png")
 
 ## Conclusion
 
+**It is possible to put the science in your statistics.**
 
-**Model framework opens the door to answering meaningful questions:**
+* Takes some careful thinking and learning.
 
-* Do pollen distributions change with elevation?
-    * Covariate-sensitive parameterizations.
+* Opens the door to more powerful analyses.
 
-* Do pollen distributions change over space or time?
-    * Regression coefficients vary over space/time.
+* More flexibility in the questions that can be answered.
 
-* How to combine multiple proxies (tree rings, pollen, etc)?
-    * Each proxy gets its own data model.
-    * Proxies link to dynamic space-time process.
 
 
 <!-- ## Thanks for the attention -->
@@ -2717,15 +2713,6 @@ knitr::include_graphics("./images/site-level-inference.png")
 
 
 
-## Conclusion
-
-**It is possible to put the science in your statistics.**
-
-* Takes some careful thinking and learning.
-
-* Opens the door to more powerful analyses.
-
-* More flexibility in the questions that can be answered.
 
 <!-- ## Thanks for the attention -->
 
